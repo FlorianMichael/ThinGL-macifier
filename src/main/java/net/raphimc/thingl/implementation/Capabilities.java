@@ -31,8 +31,10 @@ public class Capabilities {
     private final boolean isMeshOptimizerPresent;
     private final boolean isParPresent;
     private final boolean isEarcut4jPresent;
+    private final boolean isGifReaderPresent;
     private final int maxSamples;
     private final int maxColorAttachments;
+    private final int maxArrayTextureLayers;
     private final boolean supportsNVFramebufferMixedSamples;
     private final int nvFramebufferMixedSamplesMaxRasterSamples;
 
@@ -43,8 +45,10 @@ public class Capabilities {
         this.isMeshOptimizerPresent = isClassPresent("org.lwjgl.util.meshoptimizer.LibMeshOptimizer");
         this.isParPresent = isClassPresent("org.lwjgl.util.par.LibPar");
         this.isEarcut4jPresent = isClassPresent("earcut4j.Earcut");
+        this.isGifReaderPresent = isClassPresent("com.ibasco.image.gif.GifImageReader");
         this.maxSamples = GL11C.glGetInteger(GL30C.GL_MAX_SAMPLES);
         this.maxColorAttachments = GL11C.glGetInteger(GL30C.GL_MAX_COLOR_ATTACHMENTS);
+        this.maxArrayTextureLayers = GL11C.glGetInteger(GL30C.GL_MAX_ARRAY_TEXTURE_LAYERS);
         this.supportsNVFramebufferMixedSamples = GL.getCapabilities().GL_NV_framebuffer_mixed_samples;
         if (this.supportsNVFramebufferMixedSamples) {
             this.nvFramebufferMixedSamplesMaxRasterSamples = GL11C.glGetInteger(NVFramebufferMixedSamples.GL_MAX_RASTER_SAMPLES_EXT);
@@ -79,7 +83,13 @@ public class Capabilities {
 
     public void ensureEarcut4jPresent() {
         if (!this.isEarcut4jPresent) {
-            throw new UnsupportedOperationException("Earcut4j is not present. Please add the Earcut4j library to your project.");
+            throw new UnsupportedOperationException("Earcut4j is not present. Please add https://github.com/earcut4j/earcut4j to your project.");
+        }
+    }
+
+    public void ensureGifReaderPresent() {
+        if (!this.isGifReaderPresent) {
+            throw new UnsupportedOperationException("GIF Reader is not present. Please add https://github.com/RaphiMC/gif-reader to your project.");
         }
     }
 
@@ -103,12 +113,20 @@ public class Capabilities {
         return this.isEarcut4jPresent;
     }
 
+    public boolean isGifReaderPresent() {
+        return this.isGifReaderPresent;
+    }
+
     public int getMaxSamples() {
         return this.maxSamples;
     }
 
     public int getMaxColorAttachments() {
         return this.maxColorAttachments;
+    }
+
+    public int getMaxArrayTextureLayers() {
+        return this.maxArrayTextureLayers;
     }
 
     public boolean supportsNVFramebufferMixedSamples() {

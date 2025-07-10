@@ -19,20 +19,17 @@
 package net.raphimc.thingl.resource.texture;
 
 import org.lwjgl.opengl.GL11C;
-import org.lwjgl.opengl.GL32C;
 import org.lwjgl.opengl.GL45C;
 
-public class MultisampleTexture2D extends AbstractTexture {
+public class MultisampleTexture2D extends MultisampledTexture {
 
     private final int width;
     private final int height;
-    private final int samples;
 
     public MultisampleTexture2D(final InternalFormat internalFormat, final int width, final int height, final int samples) {
-        super(Type.TEX_2D_MULTISAMPLE, internalFormat);
+        super(Type.TEX_2D_MULTISAMPLE, internalFormat, samples);
         this.width = width;
         this.height = height;
-        this.samples = samples;
         de.florianmichael.thingl.GlCommands.get().glTextureStorage2DMultisample(this.getGlId(), samples, internalFormat.getGlFormat(), width, height, true); // FlorianMichael - add macOS support
     }
 
@@ -41,7 +38,6 @@ public class MultisampleTexture2D extends AbstractTexture {
         // FlorianMichael - add macOS support
         this.width = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_WIDTH);
         this.height = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_HEIGHT);
-        this.samples = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL32C.GL_TEXTURE_SAMPLES);
         // FlorianMichael - add macOS support
     }
 
@@ -51,10 +47,6 @@ public class MultisampleTexture2D extends AbstractTexture {
 
     public int getHeight() {
         return this.height;
-    }
-
-    public int getSamples() {
-        return this.samples;
     }
 
 }

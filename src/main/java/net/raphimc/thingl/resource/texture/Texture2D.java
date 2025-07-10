@@ -20,26 +20,22 @@ package net.raphimc.thingl.resource.texture;
 
 import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.util.BufferUtil;
+import net.raphimc.thingl.util.BufferedSTBWriteCallback;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL12C;
 import org.lwjgl.opengl.GL43C;
 import org.lwjgl.opengl.GL45C;
-import org.lwjgl.stb.STBIWriteCallback;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.stb.STBImageWrite;
 import org.lwjgl.system.MemoryUtil;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class Texture2D extends AbstractTexture {
+public class Texture2D extends SampledTexture {
 
     private final int width;
     private final int height;
-    private final int mipMapLevels;
-    private int minificationFilter;
-    private int magnificationFilter;
     private int wrapS;
     private int wrapT;
 
@@ -48,17 +44,16 @@ public class Texture2D extends AbstractTexture {
     }
 
     public Texture2D(final InternalFormat internalFormat, final int width, final int height, final int mipMapLevels) {
-        super(Type.TEX_2D, internalFormat);
+        super(Type.TEX_2D, internalFormat, mipMapLevels);
         this.width = width;
         this.height = height;
-        this.mipMapLevels = mipMapLevels;
         de.florianmichael.thingl.GlCommands.get().glTextureStorage2D(this.getGlId(), mipMapLevels, internalFormat.getGlFormat(), width, height); // FlorianMichael - add macOS support
-        this.setWrap(GL12C.GL_CLAMP_TO_EDGE);
         this.setFilter(GL11C.GL_LINEAR);
+        this.setWrap(GL12C.GL_CLAMP_TO_EDGE);
     }
 
     public Texture2D(final InternalFormat internalFormat, final ByteBuffer imageBuffer) {
-        super(Type.TEX_2D, internalFormat);
+        super(Type.TEX_2D, internalFormat, 1);
         try {
             final int[] width = new int[1];
             final int[] height = new int[1];
@@ -67,10 +62,9 @@ public class Texture2D extends AbstractTexture {
             }
             this.width = width[0];
             this.height = height[0];
-            this.mipMapLevels = 1;
-            de.florianmichael.thingl.GlCommands.get().glTextureStorage2D(this.getGlId(), this.mipMapLevels, internalFormat.getGlFormat(), this.width, this.height); // FlorianMichael - add macOS support
-            this.setWrap(GL12C.GL_CLAMP_TO_EDGE);
+            de.florianmichael.thingl.GlCommands.get().glTextureStorage2D(this.getGlId(), this.getMipMapLevels(), internalFormat.getGlFormat(), this.width, this.height); // FlorianMichael - add macOS support
             this.setFilter(GL11C.GL_LINEAR);
+            this.setWrap(GL12C.GL_CLAMP_TO_EDGE);
             this.uploadImage(0, 0, PixelFormat.RGBA, imageBuffer);
         } catch (Throwable e) {
             this.free();
@@ -79,7 +73,7 @@ public class Texture2D extends AbstractTexture {
     }
 
     public Texture2D(final InternalFormat internalFormat, final byte[] imageData) {
-        super(Type.TEX_2D, internalFormat);
+        super(Type.TEX_2D, internalFormat, 1);
         try {
             final ByteBuffer imageBuffer = MemoryUtil.memAlloc(imageData.length).put(imageData).flip();
             try {
@@ -90,10 +84,9 @@ public class Texture2D extends AbstractTexture {
                 }
                 this.width = width[0];
                 this.height = height[0];
-                this.mipMapLevels = 1;
-                de.florianmichael.thingl.GlCommands.get().glTextureStorage2D(this.getGlId(), this.mipMapLevels, internalFormat.getGlFormat(), this.width, this.height); // FlorianMichael - add macOS support
-                this.setWrap(GL12C.GL_CLAMP_TO_EDGE);
+                de.florianmichael.thingl.GlCommands.get().glTextureStorage2D(this.getGlId(), this.getMipMapLevels(), internalFormat.getGlFormat(), this.width, this.height); // FlorianMichael - add macOS support
                 this.setFilter(GL11C.GL_LINEAR);
+                this.setWrap(GL12C.GL_CLAMP_TO_EDGE);
                 this.uploadImage(0, 0, PixelFormat.RGBA, imageBuffer);
             } finally {
                 BufferUtil.memFree(imageBuffer);
@@ -109,16 +102,14 @@ public class Texture2D extends AbstractTexture {
         // FlorianMichael - add macOS support
         this.width = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_WIDTH);
         this.height = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_HEIGHT);
-        this.mipMapLevels = de.florianmichael.thingl.GlCommands.get().glGetTextureParameteri(glId, GL43C.GL_TEXTURE_IMMUTABLE_LEVELS);
         // FlorianMichael - add macOS support
         this.refreshCachedData();
     }
 
     @Override
     public void refreshCachedData() {
+        super.refreshCachedData();
         // FlorianMichael - add macOS support
-        this.minificationFilter = de.florianmichael.thingl.GlCommands.get().glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MIN_FILTER);
-        this.magnificationFilter = de.florianmichael.thingl.GlCommands.get().glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MAG_FILTER);
         this.wrapS = de.florianmichael.thingl.GlCommands.get().glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_WRAP_S);
         this.wrapT = de.florianmichael.thingl.GlCommands.get().glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_WRAP_T);
         // FlorianMichael - add macOS support
@@ -187,6 +178,21 @@ public class Texture2D extends AbstractTexture {
         ThinGL.glStateStack().popPixelStore();
     }
 
+    public byte[] downloadPngImageData(final int x, final int y, final int width, final int height, final PixelFormat pixelFormat) {
+        final ByteBuffer pixelBuffer = this.downloadPixelBuffer(x, y, width, height, pixelFormat);
+
+        final BufferedSTBWriteCallback writeCallback = new BufferedSTBWriteCallback();
+        try {
+            if (!STBImageWrite.stbi_write_png_to_func(writeCallback, 0, width, height, pixelFormat.getChannelCount(), pixelBuffer, 0)) {
+                throw new RuntimeException("Failed to write image: " + STBImage.stbi_failure_reason());
+            }
+            return writeCallback.getImageData();
+        } finally {
+            writeCallback.free();
+            BufferUtil.memFree(pixelBuffer);
+        }
+    }
+
     public byte[] downloadPixelData(final int x, final int y, final int width, final int height, final PixelFormat pixelFormat) {
         final ByteBuffer pixelBuffer = this.downloadPixelBuffer(x, y, width, height, pixelFormat);
         try {
@@ -214,54 +220,12 @@ public class Texture2D extends AbstractTexture {
         return pixelBuffer;
     }
 
-    public byte[] downloadPngImageData(final int x, final int y, final int width, final int height, final PixelFormat pixelFormat) {
-        final ByteBuffer pixelBuffer = this.downloadPixelBuffer(x, y, width, height, pixelFormat);
-
-        final BufferedSTBIWriteCallback writeCallback = new BufferedSTBIWriteCallback();
-        try {
-            if (!STBImageWrite.stbi_write_png_to_func(writeCallback, 0, width, height, pixelFormat.getChannelCount(), pixelBuffer, 0)) {
-                throw new RuntimeException("Failed to write image: " + STBImage.stbi_failure_reason());
-            }
-            return writeCallback.getImageData();
-        } finally {
-            writeCallback.free();
-            BufferUtil.memFree(pixelBuffer);
-        }
-    }
-
     public int getWidth() {
         return this.width;
     }
 
     public int getHeight() {
         return this.height;
-    }
-
-    public int getMipMapLevels() {
-        return this.mipMapLevels;
-    }
-
-    public int getMinificationFilter() {
-        return this.minificationFilter;
-    }
-
-    public void setMinificationFilter(final int minificationFilter) {
-        this.minificationFilter = minificationFilter;
-        de.florianmichael.thingl.GlCommands.get().glTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MIN_FILTER, minificationFilter); // FlorianMichael - add macOS support
-    }
-
-    public int getMagnificationFilter() {
-        return this.magnificationFilter;
-    }
-
-    public void setMagnificationFilter(final int magnificationFilter) {
-        this.magnificationFilter = magnificationFilter;
-        de.florianmichael.thingl.GlCommands.get().glTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MAG_FILTER, magnificationFilter); // FlorianMichael - add macOS support
-    }
-
-    public void setFilter(final int filter) {
-        this.setMinificationFilter(filter);
-        this.setMagnificationFilter(filter);
     }
 
     public int getWrapS() {
@@ -285,24 +249,6 @@ public class Texture2D extends AbstractTexture {
     public void setWrap(final int wrap) {
         this.setWrapS(wrap);
         this.setWrapT(wrap);
-    }
-
-    private static class BufferedSTBIWriteCallback extends STBIWriteCallback {
-
-        private final ByteArrayOutputStream imageData = new ByteArrayOutputStream();
-
-        @Override
-        public void invoke(final long context, final long data, final int size) {
-            final ByteBuffer dataBuffer = getData(data, size);
-            final byte[] dataBytes = new byte[size];
-            dataBuffer.get(dataBytes);
-            this.imageData.writeBytes(dataBytes);
-        }
-
-        private byte[] getImageData() {
-            return this.imageData.toByteArray();
-        }
-
     }
 
 }
