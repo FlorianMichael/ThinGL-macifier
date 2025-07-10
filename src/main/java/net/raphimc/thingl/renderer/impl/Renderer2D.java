@@ -147,6 +147,19 @@ public class Renderer2D extends Renderer {
         this.drawIfNotBuffering();
     }
 
+    // FlorianMichael - add Renderer2D#outlinedGradientRectangle
+    public void outlinedGradientRectangle(final Matrix4f positionMatrix, final float xtl, final float ytl, final float xbr, final float ybr, final Color colorStart, final Color colorEnd, final float width) {
+        final int abgrStartColor = colorStart.toABGR();
+        final int abgrEndColor = colorEnd.toABGR();
+
+        Primitives.filledRectangle(positionMatrix, targetMultiDrawBatchDataHolder, xtl - width, ytl - width, xbr + width, ytl, abgrEndColor, abgrStartColor, abgrStartColor, abgrEndColor);
+        Primitives.filledRectangle(positionMatrix, targetMultiDrawBatchDataHolder, xtl - width, ybr, xbr + width, ybr + width, abgrEndColor, abgrStartColor, abgrStartColor, abgrEndColor);
+        Primitives.filledRectangle(positionMatrix, targetMultiDrawBatchDataHolder, xtl - width, ytl, xtl, ybr, abgrEndColor);
+        Primitives.filledRectangle(positionMatrix, targetMultiDrawBatchDataHolder, xbr, ytl, xbr + width, ybr, abgrStartColor);
+        this.drawIfNotBuffering();
+    }
+    // FlorianMichael - end Renderer2D#outlinedGradientRectangle
+
     public void filledRoundedRectangle(final Matrix4f positionMatrix, final Rectangled rectangle, final float radius, final Color color) {
         this.filledRoundedRectangle(positionMatrix, rectangle, radius, radius, radius, radius, color);
     }
