@@ -457,6 +457,10 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
         return target;
     }
 
+    public Int2IntMap getTextureTargets() {
+        return textureTargets;
+    }
+
     public record VertexBufferState(int buffer, long offset, int stride) {
     }
 
