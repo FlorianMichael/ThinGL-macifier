@@ -35,7 +35,7 @@ public class VertexArray extends GLContainerObject {
     private AbstractBuffer indexBuffer;
 
     public VertexArray() {
-        super(GL45C.glCreateVertexArrays());
+        super(de.florianmichael.thingl.GlCommands.get().glCreateVertexArrays()); // FlorianMichael - add macOS support
     }
 
     protected VertexArray(final int glId) {
@@ -52,10 +52,10 @@ public class VertexArray extends GLContainerObject {
     public void setVertexBuffer(final int bindingIndex, final AbstractBuffer buffer, final long offset, final int stride) {
         if (buffer != null) {
             this.vertexBuffers.put(bindingIndex, buffer);
-            GL45C.glVertexArrayVertexBuffer(this.getGlId(), bindingIndex, buffer.getGlId(), offset, stride);
+            de.florianmichael.thingl.GlCommands.get().glVertexArrayVertexBuffer(this.getGlId(), bindingIndex, buffer.getGlId(), offset, stride); // FlorianMichael - add macOS support
         } else {
             this.vertexBuffers.remove(bindingIndex);
-            GL45C.glVertexArrayVertexBuffer(this.getGlId(), bindingIndex, 0, 0, 0);
+            de.florianmichael.thingl.GlCommands.get().glVertexArrayVertexBuffer(this.getGlId(), bindingIndex, 0, 0, 0); // FlorianMichael - add macOS support
         }
     }
 
@@ -63,10 +63,10 @@ public class VertexArray extends GLContainerObject {
         this.indexType = indexType;
         this.indexBuffer = buffer;
         if (buffer != null) {
-            GL45C.glVertexArrayElementBuffer(this.getGlId(), buffer.getGlId());
+            de.florianmichael.thingl.GlCommands.get().glVertexArrayElementBuffer(this.getGlId(), buffer.getGlId()); // FlorianMichael - add macOS support
         } else {
             if (!ThinGL.workarounds().isDsaVertexArrayElementBufferUnbindBroken()) {
-                GL45C.glVertexArrayElementBuffer(this.getGlId(), 0);
+                de.florianmichael.thingl.GlCommands.get().glVertexArrayElementBuffer(this.getGlId(), 0); // FlorianMichael - add macOS support
             } else {
                 this.bind();
                 GL15C.glBindBuffer(GL15C.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -76,6 +76,12 @@ public class VertexArray extends GLContainerObject {
     }
 
     public void configureVertexDataLayout(final int bindingIndex, final int attribOffset, final VertexDataLayout vertexDataLayout, final int divisor) {
+        // FlorianMichael - add macOS support
+        if (de.florianmichael.thingl.GlCommands.isApple()) {
+            de.florianmichael.thingl.GlCommands.getApple().configureVertexDataLayout(this.getGlId(), bindingIndex, attribOffset, vertexDataLayout, divisor);
+            return;
+        }
+        // FlorianMichael - add macOS support
         int relativeOffset = 0;
         for (int i = 0; i < vertexDataLayout.getElements().length; i++) {
             final VertexDataLayoutElement element = vertexDataLayout.getElements()[i];
@@ -100,7 +106,7 @@ public class VertexArray extends GLContainerObject {
 
     public void drawArrays(final DrawMode drawMode, final int count, final int offset, final int instanceCount, final int baseInstance) {
         this.bind();
-        GL42C.glDrawArraysInstancedBaseInstance(drawMode.getGlMode(), offset, count, instanceCount, baseInstance);
+        de.florianmichael.thingl.GlCommands.get().glDrawArraysInstancedBaseInstance(drawMode.getGlMode(), offset, count, instanceCount, baseInstance); // FlorianMichael - add macOS support
         this.unbind();
     }
 
@@ -125,7 +131,7 @@ public class VertexArray extends GLContainerObject {
 
     public void drawElements(final DrawMode drawMode, final int count, final int offset, final int instanceCount, final int baseVertex, final int baseInstance) {
         this.bind();
-        GL42C.glDrawElementsInstancedBaseVertexBaseInstance(drawMode.getGlMode(), count, this.indexType, offset, instanceCount, baseVertex, baseInstance);
+        de.florianmichael.thingl.GlCommands.get().glDrawElementsInstancedBaseVertexBaseInstance(drawMode.getGlMode(), count, this.indexType, offset, instanceCount, baseVertex, baseInstance); // FlorianMichael - add macOS support
         this.unbind();
     }
 
@@ -144,7 +150,7 @@ public class VertexArray extends GLContainerObject {
 
     @Override
     protected void free0() {
-        GL30C.glDeleteVertexArrays(this.getGlId());
+        de.florianmichael.thingl.GlCommands.get().glDeleteVertexArrays(this.getGlId()); // FlorianMichael - add macOS support
     }
 
     @Override

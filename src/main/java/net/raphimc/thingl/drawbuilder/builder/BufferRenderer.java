@@ -275,10 +275,16 @@ public class BufferRenderer {
             ThinGL.gpuBufferPool().returnBuffer((Buffer) vertexArray.getVertexBuffers().get(1));
             vertexArray.setVertexBuffer(1, null, 0, 0);
             int vertexAttribIndex = builtBuffer.drawBatch().vertexDataLayout().getElements().length;
-            while (GL45C.glGetVertexArrayIndexedi(vertexArray.getGlId(), vertexAttribIndex, GL45C.GL_VERTEX_ATTRIB_ARRAY_ENABLED) == GL11C.GL_TRUE) {
-                GL45C.glDisableVertexArrayAttrib(vertexArray.getGlId(), vertexAttribIndex);
-                vertexAttribIndex++;
+            // FlorianMichael - add macOS support
+            if (de.florianmichael.thingl.GlCommands.isApple()) {
+                de.florianmichael.thingl.GlCommands.getApple().disableVertexArrayAttrib(vertexArray.getGlId(), vertexAttribIndex);
+            } else {
+                while (GL45C.glGetVertexArrayIndexedi(vertexArray.getGlId(), vertexAttribIndex, GL45C.GL_VERTEX_ATTRIB_ARRAY_ENABLED) == GL11C.GL_TRUE) {
+                    GL45C.glDisableVertexArrayAttrib(vertexArray.getGlId(), vertexAttribIndex);
+                    vertexAttribIndex++;
+                }
             }
+            // FlorianMichael - add macOS support
         }
 
         for (AbstractBuffer buffer : builtBuffer.shaderDataBuffers().values()) {
@@ -360,22 +366,28 @@ public class BufferRenderer {
             }
         }
 
-        if (drawCommands.size() == 1) {
-            final DrawCommand drawCommand = drawCommands.get(0);
-            if (drawCommand instanceof DrawElementsCommand drawElementsCommand) {
-                vertexArray.drawElements(drawMode, drawElementsCommand.vertexCount(), drawElementsCommand.firstIndex(), drawElementsCommand.instanceCount(), drawElementsCommand.baseVertex(), drawElementsCommand.baseInstance());
-            } else if (drawCommand instanceof DrawArraysCommand drawArraysCommand) {
-                vertexArray.drawArrays(drawMode, drawArraysCommand.vertexCount(), drawArraysCommand.firstVertex(), drawArraysCommand.instanceCount(), drawArraysCommand.baseInstance());
-            }
-        } else if (builtBuffer.commandBuffer() != null) {
-            if (vertexArray.getIndexBuffer() != null) {
-                vertexArray.drawElementsIndirect(drawMode, builtBuffer.commandBuffer(), 0, drawCommands.size());
-            } else {
-                vertexArray.drawArraysIndirect(drawMode, builtBuffer.commandBuffer(), 0, drawCommands.size());
-            }
+        // FlorianMichael - add macOS support
+        if (de.florianmichael.thingl.GlCommands.isApple()) {
+            de.florianmichael.thingl.GlCommands.getApple().drawBuiltBuffer(builtBuffer);
         } else {
-            throw new IllegalStateException("Draw calls with multiple draw commands require a command buffer");
+            if (drawCommands.size() == 1) {
+                final DrawCommand drawCommand = drawCommands.get(0);
+                if (drawCommand instanceof DrawElementsCommand drawElementsCommand) {
+                    vertexArray.drawElements(drawMode, drawElementsCommand.vertexCount(), drawElementsCommand.firstIndex(), drawElementsCommand.instanceCount(), drawElementsCommand.baseVertex(), drawElementsCommand.baseInstance());
+                } else if (drawCommand instanceof DrawArraysCommand drawArraysCommand) {
+                    vertexArray.drawArrays(drawMode, drawArraysCommand.vertexCount(), drawArraysCommand.firstVertex(), drawArraysCommand.instanceCount(), drawArraysCommand.baseInstance());
+                }
+            } else if (builtBuffer.commandBuffer() != null) {
+                if (vertexArray.getIndexBuffer() != null) {
+                    vertexArray.drawElementsIndirect(drawMode, builtBuffer.commandBuffer(), 0, drawCommands.size());
+                } else {
+                    vertexArray.drawArraysIndirect(drawMode, builtBuffer.commandBuffer(), 0, drawCommands.size());
+                }
+            } else {
+                throw new IllegalStateException("Draw calls with multiple draw commands require a command buffer");
+            }
         }
+        // FlorianMichael - add macOS support
 
         if (program != null) {
             program.unbind();

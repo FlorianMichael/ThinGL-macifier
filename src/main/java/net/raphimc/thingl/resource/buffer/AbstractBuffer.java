@@ -32,7 +32,7 @@ public abstract class AbstractBuffer extends GLObject {
     protected long size;
 
     public AbstractBuffer(final long size) {
-        super(GL45C.glCreateBuffers());
+        super(de.florianmichael.thingl.GlCommands.get().glCreateBuffers()); // FlorianMichael - add macOS support
         this.size = size;
     }
 
@@ -58,7 +58,7 @@ public abstract class AbstractBuffer extends GLObject {
             throw new IllegalArgumentException("Buffer is too large");
         }
 
-        GL45C.glNamedBufferSubData(this.getGlId(), offset, buffer);
+        de.florianmichael.thingl.GlCommands.get().glNamedBufferSubData(this.getGlId(), offset, buffer); // FlorianMichael - add macOS support
     }
 
     public ByteBuffer download(final int offset) {

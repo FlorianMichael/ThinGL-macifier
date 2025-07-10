@@ -44,13 +44,13 @@ public class BufferUtil {
         if (abstractBuffer instanceof ImmutableBuffer buffer) {
             final ImmutableBuffer newBuffer = new ImmutableBuffer(size, buffer.getFlags());
             newBuffer.setDebugName(buffer.getDebugName());
-            GL45C.glCopyNamedBufferSubData(buffer.getGlId(), newBuffer.getGlId(), 0, 0, buffer.getSize());
+            de.florianmichael.thingl.GlCommands.get().glCopyNamedBufferSubData(buffer.getGlId(), newBuffer.getGlId(), 0, 0, buffer.getSize()); // FlorianMichael - add macOS support
             buffer.free();
             return newBuffer;
         } else if (abstractBuffer instanceof Buffer buffer) {
             final Buffer newBuffer = new Buffer(size, buffer.getUsage());
             newBuffer.setDebugName(buffer.getDebugName());
-            GL45C.glCopyNamedBufferSubData(buffer.getGlId(), newBuffer.getGlId(), 0, 0, buffer.getSize());
+            de.florianmichael.thingl.GlCommands.get().glCopyNamedBufferSubData(buffer.getGlId(), newBuffer.getGlId(), 0, 0, buffer.getSize()); // FlorianMichael - add macOS support
             buffer.free();
             return newBuffer;
         } else {

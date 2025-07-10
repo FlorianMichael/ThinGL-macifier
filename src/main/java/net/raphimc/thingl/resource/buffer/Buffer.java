@@ -30,13 +30,13 @@ public class Buffer extends AbstractBuffer {
     public Buffer(final long size, final int usage) {
         super(size);
         this.usage = usage;
-        GL45C.glNamedBufferData(this.getGlId(), size, usage);
+        de.florianmichael.thingl.GlCommands.get().glNamedBufferData(this.getGlId(), size, usage); // FlorianMichael - add macOS support
     }
 
     public Buffer(final ByteBuffer data, final int usage) {
         super((long) data.remaining());
         this.usage = usage;
-        GL45C.glNamedBufferData(this.getGlId(), data, usage);
+        de.florianmichael.thingl.GlCommands.get().glNamedBufferData(this.getGlId(), data, usage); // FlorianMichael - add macOS support
     }
 
     protected Buffer(final int glId) {
@@ -51,7 +51,7 @@ public class Buffer extends AbstractBuffer {
 
     public void setSize(final long size) {
         this.size = size;
-        GL45C.glNamedBufferData(this.getGlId(), size, this.usage);
+        de.florianmichael.thingl.GlCommands.get().glNamedBufferData(this.getGlId(), size, this.usage); // FlorianMichael - add macOS support
     }
 
     public int getUsage() {

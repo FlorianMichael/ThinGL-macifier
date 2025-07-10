@@ -27,12 +27,12 @@ import org.lwjgl.opengl.GL45C;
 public interface FramebufferAttachment {
 
     static FramebufferAttachment fromGlId(final int framebufferGlId, final int attachment) {
-        final int type = GL45C.glGetNamedFramebufferAttachmentParameteri(framebufferGlId, attachment, GL30C.GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE);
+        final int type = de.florianmichael.thingl.GlCommands.get().glGetNamedFramebufferAttachmentParameteri(framebufferGlId, attachment, GL30C.GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE); // FlorianMichael - add macOS support
         if (type == GL11C.GL_NONE) {
             return null;
         }
 
-        final int attachmentGlId = GL45C.glGetNamedFramebufferAttachmentParameteri(framebufferGlId, attachment, GL30C.GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME);
+        final int attachmentGlId = de.florianmichael.thingl.GlCommands.get().glGetNamedFramebufferAttachmentParameteri(framebufferGlId, attachment, GL30C.GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME); // FlorianMichael - add macOS support
         return switch (type) {
             case GL11C.GL_TEXTURE -> AbstractTexture.fromGlId(attachmentGlId);
             case GL30C.GL_RENDERBUFFER -> AbstractRenderBuffer.fromGlId(attachmentGlId);

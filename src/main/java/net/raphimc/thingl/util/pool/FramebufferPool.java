@@ -84,7 +84,7 @@ public class FramebufferPool {
         if (!this.inUse.remove(framebuffer)) {
             throw new IllegalStateException("Framebuffer is not part of the pool");
         }
-        GL45C.glInvalidateNamedFramebufferData(framebuffer.getGlId(), new int[]{GL30C.GL_COLOR_ATTACHMENT0, GL30C.GL_DEPTH_STENCIL_ATTACHMENT});
+        de.florianmichael.thingl.GlCommands.get().glInvalidateNamedFramebufferData(framebuffer.getGlId(), new int[]{GL30C.GL_COLOR_ATTACHMENT0, GL30C.GL_DEPTH_STENCIL_ATTACHMENT}); // FlorianMichael - add macOS support
         this.free.add(framebuffer);
     }
 

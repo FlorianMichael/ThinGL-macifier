@@ -29,7 +29,7 @@ public abstract class AbstractTexture extends GLObject implements FramebufferAtt
     private final int internalFormat;
 
     public AbstractTexture(final Type type, final InternalFormat internalFormat) {
-        super(GL45C.glCreateTextures(type.getGlType()));
+        super(de.florianmichael.thingl.GlCommands.get().glCreateTextures(type.getGlType())); // FlorianMichael - add macOS support
         this.type = type.getGlType();
         this.internalFormat = internalFormat.getGlFormat();
     }
@@ -37,7 +37,7 @@ public abstract class AbstractTexture extends GLObject implements FramebufferAtt
     protected AbstractTexture(final int glId, final Type type) {
         super(glId);
         this.type = type.getGlType();
-        this.internalFormat = GL45C.glGetTextureLevelParameteri(glId, 0, GL30C.GL_TEXTURE_INTERNAL_FORMAT);
+        this.internalFormat = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL30C.GL_TEXTURE_INTERNAL_FORMAT); // FlorianMichael - add macOS support
     }
 
     public static AbstractTexture fromGlId(final int glId) {
@@ -52,7 +52,7 @@ public abstract class AbstractTexture extends GLObject implements FramebufferAtt
                 default -> throw new IllegalArgumentException("Unsupported texture type: " + type.getDisplayName());
             };
         } else {
-            final int samples = GL45C.glGetTextureLevelParameteri(glId, 0, GL32C.GL_TEXTURE_SAMPLES);
+            final int samples = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL32C.GL_TEXTURE_SAMPLES); // FlorianMichael - add macOS support
             if (samples <= 0) {
                 return new Texture2D(glId);
             } else {
@@ -63,7 +63,7 @@ public abstract class AbstractTexture extends GLObject implements FramebufferAtt
 
     @Override
     protected void free0() {
-        GL11C.glDeleteTextures(this.getGlId());
+        de.florianmichael.thingl.GlCommands.get().glDeleteTextures(this.getGlId()); // FlorianMichael - add macOS support
     }
 
     @Override

@@ -52,7 +52,7 @@ public class Texture2D extends AbstractTexture {
         this.width = width;
         this.height = height;
         this.mipMapLevels = mipMapLevels;
-        GL45C.glTextureStorage2D(this.getGlId(), mipMapLevels, internalFormat.getGlFormat(), width, height);
+        de.florianmichael.thingl.GlCommands.get().glTextureStorage2D(this.getGlId(), mipMapLevels, internalFormat.getGlFormat(), width, height); // FlorianMichael - add macOS support
         this.setWrap(GL12C.GL_CLAMP_TO_EDGE);
         this.setFilter(GL11C.GL_LINEAR);
     }
@@ -68,7 +68,7 @@ public class Texture2D extends AbstractTexture {
             this.width = width[0];
             this.height = height[0];
             this.mipMapLevels = 1;
-            GL45C.glTextureStorage2D(this.getGlId(), this.mipMapLevels, internalFormat.getGlFormat(), this.width, this.height);
+            de.florianmichael.thingl.GlCommands.get().glTextureStorage2D(this.getGlId(), this.mipMapLevels, internalFormat.getGlFormat(), this.width, this.height); // FlorianMichael - add macOS support
             this.setWrap(GL12C.GL_CLAMP_TO_EDGE);
             this.setFilter(GL11C.GL_LINEAR);
             this.uploadImage(0, 0, PixelFormat.RGBA, imageBuffer);
@@ -91,7 +91,7 @@ public class Texture2D extends AbstractTexture {
                 this.width = width[0];
                 this.height = height[0];
                 this.mipMapLevels = 1;
-                GL45C.glTextureStorage2D(this.getGlId(), this.mipMapLevels, internalFormat.getGlFormat(), this.width, this.height);
+                de.florianmichael.thingl.GlCommands.get().glTextureStorage2D(this.getGlId(), this.mipMapLevels, internalFormat.getGlFormat(), this.width, this.height); // FlorianMichael - add macOS support
                 this.setWrap(GL12C.GL_CLAMP_TO_EDGE);
                 this.setFilter(GL11C.GL_LINEAR);
                 this.uploadImage(0, 0, PixelFormat.RGBA, imageBuffer);
@@ -106,18 +106,22 @@ public class Texture2D extends AbstractTexture {
 
     protected Texture2D(final int glId) {
         super(glId, Type.TEX_2D);
-        this.width = GL45C.glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_WIDTH);
-        this.height = GL45C.glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_HEIGHT);
-        this.mipMapLevels = GL45C.glGetTextureParameteri(glId, GL43C.GL_TEXTURE_IMMUTABLE_LEVELS);
+        // FlorianMichael - add macOS support
+        this.width = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_WIDTH);
+        this.height = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_HEIGHT);
+        this.mipMapLevels = de.florianmichael.thingl.GlCommands.get().glGetTextureParameteri(glId, GL43C.GL_TEXTURE_IMMUTABLE_LEVELS);
+        // FlorianMichael - add macOS support
         this.refreshCachedData();
     }
 
     @Override
     public void refreshCachedData() {
-        this.minificationFilter = GL45C.glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MIN_FILTER);
-        this.magnificationFilter = GL45C.glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MAG_FILTER);
-        this.wrapS = GL45C.glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_WRAP_S);
-        this.wrapT = GL45C.glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_WRAP_T);
+        // FlorianMichael - add macOS support
+        this.minificationFilter = de.florianmichael.thingl.GlCommands.get().glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MIN_FILTER);
+        this.magnificationFilter = de.florianmichael.thingl.GlCommands.get().glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MAG_FILTER);
+        this.wrapS = de.florianmichael.thingl.GlCommands.get().glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_WRAP_S);
+        this.wrapT = de.florianmichael.thingl.GlCommands.get().glGetTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_WRAP_T);
+        // FlorianMichael - add macOS support
     }
 
     public void uploadImage(final int x, final int y, final PixelFormat pixelFormat, final byte[] imageData) {
@@ -179,7 +183,7 @@ public class Texture2D extends AbstractTexture {
         ThinGL.glStateStack().pixelStore(GL11C.GL_UNPACK_SKIP_PIXELS, 0);
         ThinGL.glStateStack().pixelStore(GL11C.GL_UNPACK_SKIP_ROWS, 0);
         ThinGL.glStateStack().pixelStore(GL11C.GL_UNPACK_ROW_LENGTH, 0);
-        GL45C.glTextureSubImage2D(this.getGlId(), 0, x, y, width, height, pixelFormat.getGlFormat(), GL11C.GL_UNSIGNED_BYTE, pixelBuffer);
+        de.florianmichael.thingl.GlCommands.get().glTextureSubImage2D(this.getGlId(), 0, x, y, width, height, pixelFormat.getGlFormat(), GL11C.GL_UNSIGNED_BYTE, pixelBuffer); // FlorianMichael - add macOS support
         ThinGL.glStateStack().popPixelStore();
     }
 
@@ -243,7 +247,7 @@ public class Texture2D extends AbstractTexture {
 
     public void setMinificationFilter(final int minificationFilter) {
         this.minificationFilter = minificationFilter;
-        GL45C.glTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MIN_FILTER, minificationFilter);
+        de.florianmichael.thingl.GlCommands.get().glTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MIN_FILTER, minificationFilter); // FlorianMichael - add macOS support
     }
 
     public int getMagnificationFilter() {
@@ -252,7 +256,7 @@ public class Texture2D extends AbstractTexture {
 
     public void setMagnificationFilter(final int magnificationFilter) {
         this.magnificationFilter = magnificationFilter;
-        GL45C.glTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MAG_FILTER, magnificationFilter);
+        de.florianmichael.thingl.GlCommands.get().glTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_MAG_FILTER, magnificationFilter); // FlorianMichael - add macOS support
     }
 
     public void setFilter(final int filter) {
@@ -266,7 +270,7 @@ public class Texture2D extends AbstractTexture {
 
     public void setWrapS(final int wrapS) {
         this.wrapS = wrapS;
-        GL45C.glTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_WRAP_S, wrapS);
+        de.florianmichael.thingl.GlCommands.get().glTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_WRAP_S, wrapS); // FlorianMichael - add macOS support
     }
 
     public int getWrapT() {
@@ -275,7 +279,7 @@ public class Texture2D extends AbstractTexture {
 
     public void setWrapT(final int wrapT) {
         this.wrapT = wrapT;
-        GL45C.glTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_WRAP_T, wrapT);
+        de.florianmichael.thingl.GlCommands.get().glTextureParameteri(this.getGlId(), GL11C.GL_TEXTURE_WRAP_T, wrapT); // FlorianMichael - add macOS support
     }
 
     public void setWrap(final int wrap) {

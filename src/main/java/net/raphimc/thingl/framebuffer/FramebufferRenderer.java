@@ -41,7 +41,7 @@ public class FramebufferRenderer {
         this.colorAttachment.setFilter(textureFilter);
         final Texture2D depthStencilAttachment = new Texture2D(Texture2D.InternalFormat.DEPTH32F_STENCIL8, width, height);
         depthStencilAttachment.setFilter(textureFilter);
-        GL45C.glTextureParameteri(depthStencilAttachment.getGlId(), GL14C.GL_TEXTURE_COMPARE_MODE, GL11C.GL_NONE);
+        de.florianmichael.thingl.GlCommands.get().glTextureParameteri(depthStencilAttachment.getGlId(), GL14C.GL_TEXTURE_COMPARE_MODE, GL11C.GL_NONE); // FlorianMichael - add macOS support
         this.framebuffer = new Framebuffer(this.colorAttachment, depthStencilAttachment);
     }
 

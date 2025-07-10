@@ -32,6 +32,7 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryStack;
 
+import java.nio.FloatBuffer;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -99,6 +100,7 @@ public class Program extends GLContainerObject {
         GL20C.glValidateProgram(this.getGlId());
         final String validateLog = GL20C.glGetProgramInfoLog(this.getGlId());
         if (GL20C.glGetProgrami(this.getGlId(), GL20C.GL_VALIDATE_STATUS) == GL11C.GL_FALSE) {
+            if (de.florianmichael.thingl.GlCommands.isApple()) return; // FlorianMichael - add macOS support
             throw new IllegalStateException("Error validating program: " + validateLog);
         } else if (!validateLog.isBlank()) {
             ThinGL.LOGGER.warn("Program validateLog: " + validateLog);
@@ -146,6 +148,12 @@ public class Program extends GLContainerObject {
     }
 
     public void setUniformMatrix4f(final String name, final Matrix4f matrix) {
+        // FlorianMichael - add macOS support
+        if (de.florianmichael.thingl.GlCommands.isApple()) {
+            de.florianmichael.thingl.GlCommands.getApple().setUniformMatrix4f(this.getGlId(), this.getUniformLocation(name), matrix);
+            return;
+        }
+        // FlorianMichael - add macOS support
         try (MemoryStack memoryStack = MemoryStack.stackPush()) {
             final long address = memoryStack.nmalloc(Float.BYTES * 4 * 4);
             matrix.getToAddress(address);
@@ -174,12 +182,12 @@ public class Program extends GLContainerObject {
     }
 
     public void setUniformSampler(final String name, final int textureId) {
-        GL45C.glBindTextureUnit(this.currentTextureUnit, textureId);
+        de.florianmichael.thingl.GlCommands.get().glBindTextureUnit(this.currentTextureUnit, textureId); // FlorianMichael - add macOS support
         this.setUniformInt(name, this.currentTextureUnit++);
     }
 
     public void setUniformSamplerArray(final String name, final int... textureIds) {
-        GL44C.glBindTextures(this.currentTextureUnit, textureIds);
+        de.florianmichael.thingl.GlCommands.get().glBindTextures(this.currentTextureUnit, textureIds); // FlorianMichael - add macOS support
         final int[] textureUnits = new int[textureIds.length];
         for (int i = 0; i < textureIds.length; i++) {
             textureUnits[i] = this.currentTextureUnit + i;

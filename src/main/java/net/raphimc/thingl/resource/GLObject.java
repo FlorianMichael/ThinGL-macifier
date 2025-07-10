@@ -57,11 +57,13 @@ public abstract class GLObject {
     }
 
     public final String getDebugName() {
+        if (de.florianmichael.thingl.GlCommands.isApple()) return ""; // FlorianMichael - add macOS support
         this.checkAllocated();
         return GL43C.glGetObjectLabel(this.getGlType(), this.glId);
     }
 
     public final void setDebugName(final String name) {
+        if (de.florianmichael.thingl.GlCommands.isApple()) return; // FlorianMichael - add macOS support
         this.checkAllocated();
         GL43C.glObjectLabel(this.getGlType(), this.glId, name);
     }

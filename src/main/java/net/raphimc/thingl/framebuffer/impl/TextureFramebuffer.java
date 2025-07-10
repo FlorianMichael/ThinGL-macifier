@@ -50,7 +50,7 @@ public class TextureFramebuffer extends ResizingFramebuffer {
         }, addDepthAttachment ? (width, height) -> {
             final Texture2D texture = new Texture2D(AbstractTexture.InternalFormat.DEPTH32F_STENCIL8, width, height);
             texture.setFilter(textureFilter);
-            GL45C.glTextureParameteri(texture.getGlId(), GL14C.GL_TEXTURE_COMPARE_MODE, GL11C.GL_NONE);
+            de.florianmichael.thingl.GlCommands.get().glTextureParameteri(texture.getGlId(), GL14C.GL_TEXTURE_COMPARE_MODE, GL11C.GL_NONE); // FlorianMichael - add macOS support
             return texture;
         } : null);
         this.init();

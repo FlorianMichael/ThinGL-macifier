@@ -46,7 +46,7 @@ public class Workarounds {
      * @return Whether ThinGL should use an alternative way to determine the texture type.
      */
     public boolean isGetTextureParameterTextureTargetBroken() {
-        return this.isIntelGpu;
+        return this.isIntelGpu || de.florianmichael.thingl.GlCommands.isApple(); // FlorianMichael - add macOS support
     }
 
 }

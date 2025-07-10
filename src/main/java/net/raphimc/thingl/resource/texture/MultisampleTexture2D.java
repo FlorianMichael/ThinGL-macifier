@@ -33,14 +33,16 @@ public class MultisampleTexture2D extends AbstractTexture {
         this.width = width;
         this.height = height;
         this.samples = samples;
-        GL45C.glTextureStorage2DMultisample(this.getGlId(), samples, internalFormat.getGlFormat(), width, height, true);
+        de.florianmichael.thingl.GlCommands.get().glTextureStorage2DMultisample(this.getGlId(), samples, internalFormat.getGlFormat(), width, height, true); // FlorianMichael - add macOS support
     }
 
     protected MultisampleTexture2D(final int glId) {
         super(glId, Type.TEX_2D_MULTISAMPLE);
-        this.width = GL45C.glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_WIDTH);
-        this.height = GL45C.glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_HEIGHT);
-        this.samples = GL45C.glGetTextureLevelParameteri(glId, 0, GL32C.GL_TEXTURE_SAMPLES);
+        // FlorianMichael - add macOS support
+        this.width = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_WIDTH);
+        this.height = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL11C.GL_TEXTURE_HEIGHT);
+        this.samples = de.florianmichael.thingl.GlCommands.get().glGetTextureLevelParameteri(glId, 0, GL32C.GL_TEXTURE_SAMPLES);
+        // FlorianMichael - add macOS support
     }
 
     public int getWidth() {

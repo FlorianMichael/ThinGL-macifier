@@ -49,7 +49,7 @@ public class Framebuffer extends GLContainerObject {
     }
 
     public Framebuffer(final FramebufferAttachment colorAttachment, final FramebufferAttachment depthAttachment, final FramebufferAttachment stencilAttachment) {
-        super(GL45C.glCreateFramebuffers());
+        super(de.florianmichael.thingl.GlCommands.get().glCreateFramebuffers()); // FlorianMichael - add macOS support
         if (colorAttachment == null && depthAttachment == null && stencilAttachment == null) { // Attachments can be added later
             return;
         }
@@ -96,7 +96,7 @@ public class Framebuffer extends GLContainerObject {
     }
 
     public void checkFramebufferStatus() {
-        final int status = GL45C.glCheckNamedFramebufferStatus(this.getGlId(), GL30C.GL_FRAMEBUFFER);
+        final int status = de.florianmichael.thingl.GlCommands.get().glCheckNamedFramebufferStatus(this.getGlId(), GL30C.GL_FRAMEBUFFER); // FlorianMichael - add macOS support
         if (status != GL30C.GL_FRAMEBUFFER_COMPLETE) {
             switch (status) {
                 case GL30C.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
@@ -143,16 +143,16 @@ public class Framebuffer extends GLContainerObject {
 
     public void clear(final boolean color, final boolean depth, final boolean stencil) {
         if (color) {
-            GL45C.glClearNamedFramebufferfv(this.getGlId(), GL11C.GL_COLOR, 0, this.clearColor);
+            de.florianmichael.thingl.GlCommands.get().glClearNamedFramebufferfv(this.getGlId(), GL11C.GL_COLOR, 0, this.clearColor); // FlorianMichael - add macOS support
         }
         if (depth && stencil && this.depthAttachment != null && this.stencilAttachment != null) {
-            GL45C.glClearNamedFramebufferfi(this.getGlId(), GL30C.GL_DEPTH_STENCIL, 0, this.clearDepth[0], this.clearStencil[0]);
+            de.florianmichael.thingl.GlCommands.get().glClearNamedFramebufferfi(this.getGlId(), GL30C.GL_DEPTH_STENCIL, 0, this.clearDepth[0], this.clearStencil[0]); // FlorianMichael - add macOS support
         } else {
             if (depth && this.depthAttachment != null) {
-                GL45C.glClearNamedFramebufferfv(this.getGlId(), GL11C.GL_DEPTH, 0, this.clearDepth);
+                de.florianmichael.thingl.GlCommands.get().glClearNamedFramebufferfv(this.getGlId(), GL11C.GL_DEPTH, 0, this.clearDepth); // FlorianMichael - add macOS support
             }
             if (stencil && this.stencilAttachment != null) {
-                GL45C.glClearNamedFramebufferiv(this.getGlId(), GL11C.GL_STENCIL, 0, this.clearStencil);
+                de.florianmichael.thingl.GlCommands.get().glClearNamedFramebufferiv(this.getGlId(), GL11C.GL_STENCIL, 0, this.clearStencil); // FlorianMichael - add macOS support
             }
         }
     }
@@ -168,7 +168,7 @@ public class Framebuffer extends GLContainerObject {
         if (stencil) {
             mask |= GL11C.GL_STENCIL_BUFFER_BIT;
         }
-        GL45C.glBlitNamedFramebuffer(this.getGlId(), target.getGlId(), 0, 0, this.getWidth(), this.getHeight(), 0, 0, target.getWidth(), target.getHeight(), mask, GL11C.GL_NEAREST);
+        de.florianmichael.thingl.GlCommands.get().glBlitNamedFramebuffer(this.getGlId(), target.getGlId(), 0, 0, this.getWidth(), this.getHeight(), 0, 0, target.getWidth(), target.getHeight(), mask, GL11C.GL_NEAREST); // FlorianMichael - add macOS support
     }
 
     @Override
@@ -267,7 +267,7 @@ public class Framebuffer extends GLContainerObject {
         }
 
         if (attachment instanceof AbstractTexture) {
-            GL45C.glNamedFramebufferTexture(this.getGlId(), type, attachment.getGlId(), 0);
+            de.florianmichael.thingl.GlCommands.get().glNamedFramebufferTexture(this.getGlId(), type, attachment.getGlId(), 0); // FlorianMichael - add macOS support
         } else if (attachment instanceof AbstractRenderBuffer) {
             GL45C.glNamedFramebufferRenderbuffer(this.getGlId(), type, GL30C.GL_RENDERBUFFER, attachment.getGlId());
         } else {

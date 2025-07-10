@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class DebugMessageCallback {
 
     public static void install(final boolean appendStackTrace) {
+        if (de.florianmichael.thingl.GlCommands.isApple()) return; // FlorianMichael - add macOS support
         GLUtil.setupDebugMessageCallback(new PrintStream(APIUtil.DEBUG_STREAM) {
             private final AtomicInteger messagesPerSecond = new AtomicInteger();
             private final AtomicLong lastMessageTime = new AtomicLong();
