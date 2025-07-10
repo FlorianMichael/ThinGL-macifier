@@ -276,8 +276,9 @@ public class BufferRenderer {
             vertexArray.setVertexBuffer(1, null, 0, 0);
             int vertexAttribIndex = builtBuffer.drawBatch().vertexDataLayout().getElements().length;
             // FlorianMichael - add macOS support
-            if (de.florianmichael.thingl.GlCommands.isApple()) {
-                de.florianmichael.thingl.GlCommands.getApple().disableVertexArrayAttrib(vertexArray.getGlId(), vertexAttribIndex);
+            final de.florianmichael.thingl.encoder.AppleCommandEncoder appleCommandEncoder = de.florianmichael.thingl.GlCommands.getAppleOrNull();
+            if (appleCommandEncoder != null) {
+                appleCommandEncoder.disableVertexArrayAttrib(vertexArray.getGlId(), vertexAttribIndex);
             } else {
                 while (GL45C.glGetVertexArrayIndexedi(vertexArray.getGlId(), vertexAttribIndex, GL45C.GL_VERTEX_ATTRIB_ARRAY_ENABLED) == GL11C.GL_TRUE) {
                     GL45C.glDisableVertexArrayAttrib(vertexArray.getGlId(), vertexAttribIndex);
@@ -367,8 +368,9 @@ public class BufferRenderer {
         }
 
         // FlorianMichael - add macOS support
-        if (de.florianmichael.thingl.GlCommands.isApple()) {
-            de.florianmichael.thingl.GlCommands.getApple().drawBuiltBuffer(builtBuffer);
+        final de.florianmichael.thingl.encoder.AppleCommandEncoder appleCommandEncoder = de.florianmichael.thingl.GlCommands.getAppleOrNull();
+        if (appleCommandEncoder != null) {
+            appleCommandEncoder.drawBuiltBuffer(builtBuffer);
         } else {
             if (drawCommands.size() == 1) {
                 final DrawCommand drawCommand = drawCommands.get(0);

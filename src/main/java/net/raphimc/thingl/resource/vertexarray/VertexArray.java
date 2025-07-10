@@ -77,8 +77,9 @@ public class VertexArray extends GLContainerObject {
 
     public void configureVertexDataLayout(final int bindingIndex, final int attribOffset, final VertexDataLayout vertexDataLayout, final int divisor) {
         // FlorianMichael - add macOS support
-        if (de.florianmichael.thingl.GlCommands.isApple()) {
-            de.florianmichael.thingl.GlCommands.getApple().configureVertexDataLayout(this.getGlId(), bindingIndex, attribOffset, vertexDataLayout, divisor);
+        final de.florianmichael.thingl.encoder.AppleCommandEncoder appleCommandEncoder = de.florianmichael.thingl.GlCommands.getAppleOrNull();
+        if (appleCommandEncoder != null) {
+            appleCommandEncoder.configureVertexDataLayout(this.getGlId(), bindingIndex, attribOffset, vertexDataLayout, divisor);
             return;
         }
         // FlorianMichael - add macOS support

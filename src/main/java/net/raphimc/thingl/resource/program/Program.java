@@ -32,7 +32,6 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryStack;
 
-import java.nio.FloatBuffer;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -149,8 +148,9 @@ public class Program extends GLContainerObject {
 
     public void setUniformMatrix4f(final String name, final Matrix4f matrix) {
         // FlorianMichael - add macOS support
-        if (de.florianmichael.thingl.GlCommands.isApple()) {
-            de.florianmichael.thingl.GlCommands.getApple().setUniformMatrix4f(this.getGlId(), this.getUniformLocation(name), matrix);
+        final de.florianmichael.thingl.encoder.AppleCommandEncoder appleCommandEncoder = de.florianmichael.thingl.GlCommands.getAppleOrNull();
+        if (appleCommandEncoder != null) {
+            appleCommandEncoder.setUniformMatrix4f(this.getGlId(), this.getUniformLocation(name), matrix);
             return;
         }
         // FlorianMichael - add macOS support

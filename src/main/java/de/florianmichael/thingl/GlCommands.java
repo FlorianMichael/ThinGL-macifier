@@ -19,7 +19,6 @@ package de.florianmichael.thingl;
 
 import de.florianmichael.thingl.encoder.AppleCommandEncoder;
 import de.florianmichael.thingl.encoder.GlCommandEncoder;
-import de.florianmichael.thingl.encoder.DummyCommandEncoder;
 import net.raphimc.thingl.ThinGL;
 
 public class GlCommands {
@@ -33,7 +32,7 @@ public class GlCommands {
             instance = new AppleCommandEncoder();
             ThinGL.LOGGER.warn("macOS detected, using limited features. Some features may not work as expected.");
         } else {
-            instance = new DummyCommandEncoder();
+            instance = new GlCommandEncoder() {};
         }
     }
 
@@ -45,11 +44,11 @@ public class GlCommands {
         return apple;
     }
 
-    public static AppleCommandEncoder getApple() {
+    public static AppleCommandEncoder getAppleOrNull() {
         if (instance instanceof AppleCommandEncoder appleCommandEncoder) {
             return appleCommandEncoder;
         } else {
-            throw new IllegalStateException("This method can only be called when the current context is an Apple context");
+            return null;
         }
     }
 
