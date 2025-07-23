@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.resource.sync;
 
 import org.lwjgl.opengl.GL32C;
@@ -28,9 +27,6 @@ public abstract class GLSyncObject {
 
     protected GLSyncObject(final long pointer) {
         this.pointer = pointer;
-    }
-
-    public void refreshCachedData() {
     }
 
     public void free() {

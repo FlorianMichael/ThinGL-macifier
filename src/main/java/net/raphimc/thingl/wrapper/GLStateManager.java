@@ -17,18 +17,12 @@
  */
 package net.raphimc.thingl.wrapper;
 
-import net.raphimc.thingl.ThinGL;
-import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL14C;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
 
 public class GLStateManager {
-
-    @ApiStatus.Internal
-    public GLStateManager(final ThinGL thinGL) {
-    }
 
     public boolean getCapability(final int capability) {
         return GL11C.glIsEnabled(capability);
@@ -64,7 +58,11 @@ public class GLStateManager {
     }
 
     public void setBlendFunc(final int srcRGB, final int dstRGB, final int srcAlpha, final int dstAlpha) {
-        GL14C.glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+        if (srcRGB == srcAlpha && dstRGB == dstAlpha) {
+            GL11C.glBlendFunc(srcRGB, dstRGB);
+        } else {
+            GL14C.glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+        }
     }
 
     public int getDepthFunc() {
@@ -73,6 +71,14 @@ public class GLStateManager {
 
     public void setDepthFunc(final int func) {
         GL11C.glDepthFunc(func);
+    }
+
+    public int getBlendEquation() {
+        return GL11C.glGetInteger(GL14C.GL_BLEND_EQUATION);
+    }
+
+    public void setBlendEquation(final int mode) {
+        GL14C.glBlendEquation(mode);
     }
 
     public ColorMask getColorMask() {
@@ -96,6 +102,26 @@ public class GLStateManager {
         GL11C.glDepthMask(state);
     }
 
+    public StencilMask getStencilMask() {
+        return new StencilMask(
+                GL11C.glGetInteger(GL11C.GL_STENCIL_WRITEMASK),
+                GL11C.glGetInteger(GL20C.GL_STENCIL_BACK_WRITEMASK)
+        );
+    }
+
+    public void setStencilMask(final int mask) {
+        this.setStencilMask(mask, mask);
+    }
+
+    public void setStencilMask(final int front, final int back) {
+        if (front == back) {
+            GL11C.glStencilMask(front);
+        } else {
+            GL20C.glStencilMaskSeparate(GL11C.GL_FRONT, front);
+            GL20C.glStencilMaskSeparate(GL11C.GL_BACK, back);
+        }
+    }
+
     public Scissor getScissor() {
         final int[] scissor = new int[4];
         GL11C.glGetIntegerv(GL11C.GL_SCISSOR_BOX, scissor);
@@ -114,6 +140,22 @@ public class GLStateManager {
 
     public void setViewport(final int x, final int y, final int width, final int height) {
         GL11C.glViewport(x, y, width, height);
+    }
+
+    public int getCullFace() {
+        return GL11C.glGetInteger(GL11C.GL_CULL_FACE_MODE);
+    }
+
+    public void setCullFace(final int mode) {
+        GL11C.glCullFace(mode);
+    }
+
+    public int getFrontFace() {
+        return GL11C.glGetInteger(GL11C.GL_FRONT_FACE);
+    }
+
+    public void setFrontFace(final int dir) {
+        GL11C.glFrontFace(dir);
     }
 
     public int getLogicOp() {
@@ -163,6 +205,9 @@ public class GLStateManager {
     }
 
     public record ColorMask(boolean red, boolean green, boolean blue, boolean alpha) {
+    }
+
+    public record StencilMask(int front, int back) {
     }
 
     public record Scissor(int x, int y, int width, int height) {

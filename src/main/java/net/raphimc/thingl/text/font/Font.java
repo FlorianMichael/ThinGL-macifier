@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.text.font;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -130,8 +129,8 @@ public class Font {
         final int height = bitmap.rows();
         final int xOffset = glyphSlot.bitmap_left();
         final int yOffset = -glyphSlot.bitmap_top();
-        final ByteBuffer pixels = bitmap.buffer(width * height);
-        return new GlyphBitmap(pixels, width, height, xOffset, yOffset);
+        final ByteBuffer pixelBuffer = bitmap.buffer(width * height);
+        return new GlyphBitmap(pixelBuffer, width, height, xOffset, yOffset);
     }
 
     public void free() {
@@ -221,7 +220,7 @@ public class Font {
     public record Glyph(Font font, int glyphIndex, float width, float height, float xAdvance, float bearingX, float bearingY) {
     }
 
-    public record GlyphBitmap(ByteBuffer pixels, int width, int height, int xOffset, int yOffset) {
+    public record GlyphBitmap(ByteBuffer pixelBuffer, int width, int height, int xOffset, int yOffset) {
     }
 
 }

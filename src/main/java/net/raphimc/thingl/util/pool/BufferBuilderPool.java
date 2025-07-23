@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.util.pool;
 
 import it.unimi.dsi.fastutil.objects.Reference2LongMap;
@@ -24,7 +23,6 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import it.unimi.dsi.fastutil.objects.ReferenceList;
 import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.drawbuilder.builder.BufferBuilder;
-import org.jetbrains.annotations.ApiStatus;
 
 public class BufferBuilderPool {
 
@@ -32,9 +30,8 @@ public class BufferBuilderPool {
     private final ReferenceList<BufferBuilder> inUse = new ReferenceArrayList<>();
     private final Reference2LongMap<BufferBuilder> bufferBuilderAccessTime = new Reference2LongOpenHashMap<>();
 
-    @ApiStatus.Internal
-    public BufferBuilderPool(final ThinGL thinGL) {
-        thinGL.addFinishFrameCallback(() -> {
+    public BufferBuilderPool() {
+        ThinGL.get().addFinishFrameCallback(() -> {
             if (!this.inUse.isEmpty()) {
                 ThinGL.LOGGER.warn(this.inUse.size() + " BufferBuilder(s) were not returned to the pool. Forcibly reclaiming them.");
                 for (BufferBuilder bufferBuilder : this.inUse) {
@@ -82,7 +79,6 @@ public class BufferBuilderPool {
         return this.free.size() + this.inUse.size();
     }
 
-    @ApiStatus.Internal
     public void free() {
         for (BufferBuilder bufferBuilder : this.free) {
             bufferBuilder.free();

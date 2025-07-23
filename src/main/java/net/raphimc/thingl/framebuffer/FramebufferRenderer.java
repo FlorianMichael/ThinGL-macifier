@@ -15,17 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.framebuffer;
 
 import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.resource.framebuffer.Framebuffer;
-import net.raphimc.thingl.resource.texture.Texture2D;
+import net.raphimc.thingl.resource.image.texture.Texture2D;
 import net.raphimc.thingl.util.RenderMathUtil;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL14C;
-import org.lwjgl.opengl.GL45C;
+import org.lwjgl.opengl.GL30C;
 
 public class FramebufferRenderer {
 
@@ -38,11 +37,11 @@ public class FramebufferRenderer {
     }
 
     public FramebufferRenderer(final int width, final int height, final boolean addDepthAttachment) {
-        this.colorAttachment = new Texture2D(Texture2D.InternalFormat.RGBA8, width, height);
+        this.colorAttachment = new Texture2D(GL11C.GL_RGBA8, width, height);
         if (addDepthAttachment) {
-            this.depthStencilAttachment = new Texture2D(Texture2D.InternalFormat.DEPTH32F_STENCIL8, width, height);
-            de.florianmichael.thingl.GlCommands.get().glTextureParameteri(depthStencilAttachment.getGlId(), GL14C.GL_TEXTURE_COMPARE_MODE, GL11C.GL_NONE); // FlorianMichael - add macOS support
-            this.framebuffer = new Framebuffer(this.colorAttachment, this.depthStencilAttachment);
+            this.depthStencilAttachment = new Texture2D(GL30C.GL_DEPTH32F_STENCIL8, width, height);
+            this.depthStencilAttachment.setParameterInt(GL14C.GL_TEXTURE_COMPARE_MODE, GL11C.GL_NONE);
+            this.framebuffer = new Framebuffer(this.colorAttachment, this.depthStencilAttachment, this.depthStencilAttachment);
         } else {
             this.depthStencilAttachment = null;
             this.framebuffer = new Framebuffer(this.colorAttachment);

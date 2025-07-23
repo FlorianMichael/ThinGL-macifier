@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.program;
 
 import net.lenni0451.commons.color.Color;
@@ -24,17 +23,11 @@ import net.raphimc.thingl.resource.framebuffer.Framebuffer;
 import net.raphimc.thingl.resource.program.Program;
 import net.raphimc.thingl.resource.shader.Shader;
 import net.raphimc.thingl.util.RenderMathUtil;
-import org.jetbrains.annotations.ApiStatus;
 
 public class RegularProgram extends Program {
 
     public RegularProgram(final Shader... shaders) {
         super(shaders);
-    }
-
-    @ApiStatus.Internal
-    protected RegularProgram(final int glId) {
-        super(glId);
     }
 
     @Override

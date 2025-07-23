@@ -15,22 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.drawbuilder.builder;
 
 import net.raphimc.thingl.drawbuilder.DrawBatch;
 import net.raphimc.thingl.drawbuilder.builder.command.DrawCommand;
-import net.raphimc.thingl.resource.buffer.AbstractBuffer;
+import net.raphimc.thingl.resource.buffer.Buffer;
 import net.raphimc.thingl.resource.vertexarray.VertexArray;
 
 import java.util.List;
 import java.util.Map;
 
-public record BuiltBuffer(DrawBatch drawBatch, VertexArray vertexArray, Map<String, AbstractBuffer> shaderDataBuffers, AbstractBuffer commandBuffer, List<DrawCommand> drawCommands) {
+public record BuiltBuffer(DrawBatch drawBatch, VertexArray vertexArray, Map<String, Buffer> shaderDataBuffers, Buffer commandBuffer, List<DrawCommand> drawCommands) {
 
     public void free() {
         this.vertexArray.freeFully();
-        for (AbstractBuffer buffer : this.shaderDataBuffers.values()) {
+        for (Buffer buffer : this.shaderDataBuffers.values()) {
             buffer.free();
         }
         if (this.commandBuffer != null) {

@@ -15,16 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.drawbuilder.index;
 
-import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.drawbuilder.builder.BufferBuilder;
 import net.raphimc.thingl.drawbuilder.databuilder.holder.IndexDataHolder;
-import net.raphimc.thingl.resource.buffer.AbstractBuffer;
 import net.raphimc.thingl.resource.buffer.Buffer;
+import net.raphimc.thingl.resource.buffer.MutableBuffer;
 import net.raphimc.thingl.util.BufferUtil;
-import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.opengl.GL15C;
 
 import java.nio.ByteBuffer;
@@ -34,11 +31,10 @@ public class QuadIndexBuffer {
     public static final int QUAD_VERTEX_COUNT = 4;
     public static final int QUAD_INDEX_COUNT = 6;
 
-    private final Buffer indexBuffer = new Buffer(0L, GL15C.GL_DYNAMIC_DRAW);
+    private final MutableBuffer indexBuffer = new MutableBuffer(0L, GL15C.GL_DYNAMIC_DRAW);
     private ByteBuffer indexData = null;
 
-    @ApiStatus.Internal
-    public QuadIndexBuffer(final ThinGL thinGL) {
+    public QuadIndexBuffer() {
         this.ensureSize(4096);
         this.indexBuffer.setDebugName("Quad Index Buffer");
     }
@@ -50,7 +46,7 @@ public class QuadIndexBuffer {
             }
             this.indexData = this.createIndexData(quadCount);
             this.indexBuffer.setSize(this.indexData.remaining());
-            this.indexBuffer.upload(0, this.indexData);
+            this.indexBuffer.upload(this.indexData);
         }
     }
 
@@ -63,7 +59,7 @@ public class QuadIndexBuffer {
         return bufferBuilder.finish();
     }
 
-    public AbstractBuffer getSharedBuffer() {
+    public Buffer getSharedBuffer() {
         return this.indexBuffer;
     }
 
@@ -71,7 +67,6 @@ public class QuadIndexBuffer {
         return this.indexData;
     }
 
-    @ApiStatus.Internal
     public void free() {
         this.indexBuffer.free();
         BufferUtil.memFree(this.indexData);

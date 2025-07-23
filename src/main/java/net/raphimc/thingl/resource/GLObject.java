@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.resource;
 
 import org.lwjgl.opengl.GL43C;
@@ -28,9 +27,6 @@ public abstract class GLObject {
 
     protected GLObject(final int glId) {
         this.glId = glId;
-    }
-
-    public void refreshCachedData() {
     }
 
     public void free() {
@@ -57,15 +53,13 @@ public abstract class GLObject {
     }
 
     public final String getDebugName() {
-        if (de.florianmichael.thingl.GlCommands.isApple()) return ""; // FlorianMichael - add macOS support
         this.checkAllocated();
-        return GL43C.glGetObjectLabel(this.getGlType(), this.glId);
+        return de.florianmichael.thingl.GlCommands.get().glGetObjectLabel(this.getGlType(), this.glId);
     }
 
     public final void setDebugName(final String name) {
-        if (de.florianmichael.thingl.GlCommands.isApple()) return; // FlorianMichael - add macOS support
         this.checkAllocated();
-        GL43C.glObjectLabel(this.getGlType(), this.glId, name);
+        de.florianmichael.thingl.GlCommands.get().glObjectLabel(this.getGlType(), this.glId, name);
     }
 
     @Override

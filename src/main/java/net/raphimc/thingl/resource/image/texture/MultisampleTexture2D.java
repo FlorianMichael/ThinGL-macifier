@@ -15,29 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.raphimc.thingl.resource.image.texture;
 
-package net.raphimc.thingl.resource.renderbuffer;
-
-import org.lwjgl.opengl.GL30C;
+import net.lenni0451.commons.color.Color;
+import net.raphimc.thingl.resource.image.MultisampleImageStorage2D;
+import org.lwjgl.opengl.GL32C;
 import org.lwjgl.opengl.GL45C;
 
-public class MultisampleRenderBuffer extends AbstractRenderBuffer {
+public class MultisampleTexture2D extends MultisampleTexture implements MultisampleImageStorage2D {
 
-    private final int samples;
-
-    public MultisampleRenderBuffer(final int internalFormat, final int width, final int height, final int samples) {
-        super(internalFormat, width, height);
-        this.samples = samples;
-        GL45C.glNamedRenderbufferStorageMultisample(this.getGlId(), samples, internalFormat, width, height);
+    public MultisampleTexture2D(final int internalFormat, final int width, final int height, final int samples) {
+        super(GL32C.GL_TEXTURE_2D_MULTISAMPLE);
+        de.florianmichael.thingl.GlCommands.get().glTextureStorage2DMultisample(this.getGlId(), samples, internalFormat, width, height, true);
     }
 
-    protected MultisampleRenderBuffer(final int glId) {
-        super(glId);
-        this.samples = GL45C.glGetNamedRenderbufferParameteri(this.getGlId(), GL30C.GL_RENDERBUFFER_SAMPLES);
+    protected MultisampleTexture2D(final int glId) {
+        super(glId, null);
     }
 
-    public int getSamples() {
-        return this.samples;
+    public void clear(final int x, final int y, final int width, final int height, final Color color) {
+        this.clear(0, x, y, 0, width, height, 1, color);
     }
 
 }

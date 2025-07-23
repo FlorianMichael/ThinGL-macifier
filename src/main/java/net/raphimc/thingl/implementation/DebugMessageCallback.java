@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.implementation;
 
 import net.raphimc.thingl.ThinGL;
@@ -61,6 +60,8 @@ public class DebugMessageCallback {
 
         // NVIDIA: Texture state usage warning: The texture object (0) bound to texture image unit 1 does not have a defined base level and cannot be used for texture mapping.
         GL43C.glDebugMessageControl(GL43C.GL_DEBUG_SOURCE_API, GL43C.GL_DEBUG_TYPE_OTHER, GL11C.GL_DONT_CARE, 0x20084, false);
+        // NVIDIA: Framebuffer detailed info: The driver allocated storage for renderbuffer 1.
+        GL43C.glDebugMessageControl(GL43C.GL_DEBUG_SOURCE_API, GL43C.GL_DEBUG_TYPE_OTHER, GL11C.GL_DONT_CARE, 0x20061, false);
     }
 
 }

@@ -38,6 +38,14 @@ public interface GlCommandEncoder {
         return GL45C.glCreateVertexArrays();
     }
 
+    default int glCreateRenderbuffers() {
+        return GL45C.glCreateRenderbuffers();
+    }
+
+    default int glCreateQueries(int target) {
+        return GL45C.glCreateQueries(target);
+    }
+
     default void glDeleteVertexArrays(int array) {
         GL45C.glDeleteVertexArrays(array);
     }
@@ -50,6 +58,26 @@ public interface GlCommandEncoder {
         GL45C.glDeleteTextures(texture);
     }
 
+    default boolean glUnmapNamedBuffer(int buffer) {
+        return GL45C.glUnmapNamedBuffer(buffer);
+    }
+
+    default void glNamedBufferStorage(int buffer, long size, int flags) {
+        GL45C.glNamedBufferStorage(buffer, size, flags);
+    }
+
+    default void glNamedBufferStorage(int buffer, ByteBuffer data, int flags) {
+        GL45C.glNamedBufferStorage(buffer, data, flags);
+    }
+
+    default void glNamedRenderbufferStorageMultisample(int renderbuffer, int samples, int internalformat, int width, int height) {
+        GL45C.glNamedRenderbufferStorageMultisample(renderbuffer, samples, internalformat, width, height);
+    }
+
+    default void glNamedRenderbufferStorage(int renderbuffer, int internalformat, int width, int height) {
+        GL45C.glNamedRenderbufferStorage(renderbuffer, internalformat, width, height);
+    }
+
     default void glNamedBufferSubData(int buffer, long offset, ByteBuffer data) {
         GL45C.glNamedBufferSubData(buffer, offset, data);
     }
@@ -60,6 +88,30 @@ public interface GlCommandEncoder {
 
     default void glNamedBufferData(int buffer, ByteBuffer data, int usage) {
         GL45C.glNamedBufferData(buffer, data, usage);
+    }
+
+    default void glGetNamedBufferSubData(int buffer, long offset, ByteBuffer data) {
+        GL45C.glGetNamedBufferSubData(buffer, offset, data);
+    }
+
+    default int glGetNamedBufferParameteri(int buffer, int pname) {
+        return GL45C.glGetNamedBufferParameteri(buffer, pname);
+    }
+
+    default ByteBuffer glMapNamedBuffer(int buffer, int access) {
+        return GL45C.glMapNamedBuffer(buffer, access);
+    }
+
+    default ByteBuffer glMapNamedBufferRange(int buffer, long offset, long length, int access) {
+        return GL45C.glMapNamedBufferRange(buffer, offset, length, access);
+    }
+
+    default void glFlushMappedNamedBufferRange(int buffer, long offset, long length) {
+        GL45C.glFlushMappedNamedBufferRange(buffer, offset, length);
+    }
+
+    default long glGetNamedBufferParameteri64(int buffer, int pname) {
+        return GL45C.glGetNamedBufferParameteri64(buffer, pname);
     }
 
     default void glCopyNamedBufferSubData(int readBuffer, int writeBuffer, long readOffset, long writeOffset, long size) {
@@ -98,6 +150,18 @@ public interface GlCommandEncoder {
         return GL45C.glGetNamedFramebufferAttachmentParameteri(framebuffer, attachment, pname);
     }
 
+    default int glGetNamedRenderbufferParameteri(int renderbuffer, int pname) {
+        return GL45C.glGetNamedRenderbufferParameteri(renderbuffer, pname);
+    }
+
+    default void glNamedFramebufferRenderbuffer(int framebuffer, int attachment, int renderbuffertarget, int renderbuffer) {
+        GL45C.glNamedFramebufferRenderbuffer(framebuffer, attachment, renderbuffertarget, renderbuffer);
+    }
+
+    default void glGenerateTextureMipmap(int texture) {
+        GL45C.glGenerateTextureMipmap(texture);
+    }
+
     default void glBindTextureUnit(int unit, int texture) {
         GL45C.glBindTextureUnit(unit, texture);
     }
@@ -118,6 +182,58 @@ public interface GlCommandEncoder {
         GL45C.glTextureSubImage2D(texture, level, xoffset, yoffset, width, height, format, type, pixels);
     }
 
+    default void glTextureSubImage3D(int texture, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, ByteBuffer pixels) {
+        GL45C.glTextureSubImage3D(texture, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
+    }
+
+    default void glTextureSubImage1D(int texture, int level, int xoffset, int width, int format, int type, ByteBuffer pixels) {
+        GL45C.glTextureSubImage1D(texture, level, xoffset, width, format, type, pixels);
+    }
+
+    default void glGetTextureSubImage(int texture, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, ByteBuffer pixels) {
+        GL45C.glGetTextureSubImage(texture, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
+    }
+
+    default void glClearTexImage(int texture, int level, int format, int type, float[] data) {
+        GL45C.glClearTexImage(texture, level, format, type, data);
+    }
+
+    default void glClearTexImage(int texture, int level, int format, int type, ByteBuffer data) {
+        GL45C.glClearTexImage(texture, level, format, type, data);
+    }
+
+    default void glClearTexSubImage(int texture, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, float[] data) {
+        GL45C.glClearTexSubImage(texture, level, xoffset, yoffset, zoffset, width, height, depth, format, type, data);
+    }
+
+    default void glClearTexSubImage(int texture, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, ByteBuffer data) {
+        GL45C.glClearTexSubImage(texture, level, xoffset, yoffset, zoffset, width, height, depth, format, type, data);
+    }
+
+    default float glGetTextureParameterf(int texture, int pname) {
+        return GL45C.glGetTextureParameterf(texture, pname);
+    }
+
+    default void glTextureParameterf(int texture, int pname, float param) {
+        GL45C.glTextureParameterf(texture, pname, param);
+    }
+
+    default void glGetTextureParameteriv(int texture, int pname, int[] params) {
+        GL45C.glGetTextureParameteriv(texture, pname, params);
+    }
+
+    default void glTextureParameteriv(int texture, int pname, int[] params) {
+        GL45C.glTextureParameteriv(texture, pname, params);
+    }
+
+    default void glGetTextureParameterfv(int texture, int pname, float[] params) {
+        GL45C.glGetTextureParameterfv(texture, pname, params);
+    }
+
+    default void glTextureParameterfv(int texture, int pname, float[] params) {
+        GL45C.glTextureParameterfv(texture, pname, params);
+    }
+
     default void glTextureParameteri(int texture, int pname, int param) {
         GL45C.glTextureParameteri(texture, pname, param);
     }
@@ -130,6 +246,22 @@ public interface GlCommandEncoder {
         return GL45C.glGetTextureParameteri(texture, pname);
     }
 
+    default void glTextureBuffer(int texture, int internalformat, int buffer) {
+        GL45C.glTextureBuffer(texture, internalformat, buffer);
+    }
+
+    default void glTextureStorage3D(int texture, int levels, int internalformat, int width, int height, int depth) {
+        GL45C.glTextureStorage3D(texture, levels, internalformat, width, height, depth);
+    }
+
+    default void glTextureStorage3DMultisample(int texture, int samples, int internalformat, int width, int height, int depth, boolean fixedsamplelocations) {
+        GL45C.glTextureStorage3DMultisample(texture, samples, internalformat, width, height, depth, fixedsamplelocations);
+    }
+
+    default void glTextureStorage1D(int texture, int levels, int internalformat, int width) {
+        GL45C.glTextureStorage1D(texture, levels, internalformat, width);
+    }
+
     default void glVertexArrayVertexBuffer(int vaobj, int bindingindex, int buffer, long offset, int stride) {
         GL45C.glVertexArrayVertexBuffer(vaobj, bindingindex, buffer, offset, stride);
     }
@@ -138,12 +270,68 @@ public interface GlCommandEncoder {
         GL45C.glVertexArrayElementBuffer(vaobj, buffer);
     }
 
+    default void glVertexArrayAttribFormat(int vaobj, int attribindex, int size, int type, boolean normalized, int relativeoffset) {
+        GL45C.glVertexArrayAttribFormat(vaobj, attribindex, size, type, normalized, relativeoffset);
+    }
+
+    default void glVertexArrayAttribIFormat(int vaobj, int attribindex, int size, int type, int relativeoffset) {
+        GL45C.glVertexArrayAttribIFormat(vaobj, attribindex, size, type, relativeoffset);
+    }
+
+    default void glVertexArrayAttribLFormat(int vaobj, int attribindex, int size, int type, int relativeoffset) {
+        GL45C.glVertexArrayAttribLFormat(vaobj, attribindex, size, type, relativeoffset);
+    }
+
+    default void glVertexArrayAttribBinding(int vaobj, int attribindex, int bindingindex) {
+        GL45C.glVertexArrayAttribBinding(vaobj, attribindex, bindingindex);
+    }
+
+    default void glEnableVertexArrayAttrib(int vaobj, int index) {
+        GL45C.glEnableVertexArrayAttrib(vaobj, index);
+    }
+
+    default void glVertexArrayBindingDivisor(int vaobj, int bindingindex, int divisor) {
+        GL45C.glVertexArrayBindingDivisor(vaobj, bindingindex, divisor);
+    }
+
     default void glDrawArraysInstancedBaseInstance(int mode, int first, int count, int primcount, int baseinstance) {
         GL45C.glDrawArraysInstancedBaseInstance(mode, first, count, primcount, baseinstance);
     }
 
     default void glDrawElementsInstancedBaseVertexBaseInstance(int mode, int count, int type, long indices, int primcount,int basevertex, int baseinstance) {
         GL45C.glDrawElementsInstancedBaseVertexBaseInstance(mode, count, type, indices, primcount, basevertex, baseinstance);
+    }
+
+    default void glMultiDrawArraysIndirect(int mode, long indirect, int drawcount, int stride) {
+        GL45C.glMultiDrawArraysIndirect(mode, indirect, drawcount, stride);
+    }
+
+    default void glMultiDrawElementsIndirect(int mode, int type, long indirect, int drawcount,  int stride) {
+        GL45C.glMultiDrawElementsIndirect(mode, type, indirect, drawcount, stride);
+    }
+
+    default void glCopyImageSubData(int srcName, int srcTarget, int srcLevel, int srcX, int srcY, int srcZ, int dstName, int dstTarget, int dstLevel, int dstX, int dstY, int dstZ, int srcWidth, int srcHeight, int srcDepth) {
+        GL45C.glCopyImageSubData(srcName, srcTarget, srcLevel, srcX, srcY, srcZ, dstName, dstTarget, dstLevel, dstX, dstY, dstZ, srcWidth, srcHeight, srcDepth);
+    }
+
+    default int glGetProgramResourceIndex(int program, int programInterface, CharSequence name) {
+        return GL45C.glGetProgramResourceIndex(program, programInterface, name);
+    }
+
+    default void glBindImageTexture(int unit, int texture, int level, boolean layered, int layer, int access, int format) {
+        GL45C.glBindImageTexture(unit, texture, level, layered, layer, access, format);
+    }
+
+    default void glShaderStorageBlockBinding(int program, int storageBlockIndex, int storageBlockBinding) {
+        GL45C.glShaderStorageBlockBinding(program, storageBlockIndex, storageBlockBinding);
+    }
+
+    default String glGetObjectLabel(int identifier, int name) {
+        return GL45C.glGetObjectLabel(identifier, name);
+    }
+
+    default void glObjectLabel(int identifier, int name, CharSequence label) {
+        GL45C.glObjectLabel(identifier, name, label);
     }
 
 }

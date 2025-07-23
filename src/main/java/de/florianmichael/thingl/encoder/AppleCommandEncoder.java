@@ -26,17 +26,15 @@ import net.raphimc.thingl.drawbuilder.builder.BuiltBuffer;
 import net.raphimc.thingl.drawbuilder.builder.command.DrawArraysCommand;
 import net.raphimc.thingl.drawbuilder.builder.command.DrawCommand;
 import net.raphimc.thingl.drawbuilder.builder.command.DrawElementsCommand;
-import net.raphimc.thingl.drawbuilder.vertex.TargetDataType;
-import net.raphimc.thingl.drawbuilder.vertex.VertexDataLayout;
-import net.raphimc.thingl.drawbuilder.vertex.VertexDataLayoutElement;
 import net.raphimc.thingl.resource.vertexarray.VertexArray;
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL41C;
 import org.lwjgl.opengl.GL43C;
-import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public final class AppleCommandEncoder implements GlCommandEncoder {
 
@@ -75,7 +73,7 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
     }
 
     private final Int2IntMap textureTargets = new Int2IntOpenHashMap();
-    private final Int2ObjectMap<Int2ObjectMap<VertexBufferState>> vertexArrayStates = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<VAOState> vertexArrayStates = new Int2ObjectOpenHashMap<>();
 
     @Override
     public int glCreateBuffers() {
@@ -90,8 +88,18 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
     @Override
     public int glCreateVertexArrays() {
         final int vertexArrayObject = GL41C.glGenVertexArrays();
-        vertexArrayStates.put(vertexArrayObject, new Int2ObjectOpenHashMap<>());
+        vertexArrayStates.put(vertexArrayObject, new VAOState());
         return vertexArrayObject;
+    }
+
+    @Override
+    public int glCreateRenderbuffers() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int glCreateQueries(int target) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -111,6 +119,31 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
     public void glDeleteTextures(int texture) {
         GL41C.glDeleteTextures(texture);
         textureTargets.remove(texture);
+    }
+
+    @Override
+    public boolean glUnmapNamedBuffer(int buffer) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glNamedBufferStorage(int buffer, long size, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glNamedBufferStorage(int buffer, ByteBuffer data, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glNamedRenderbufferStorageMultisample(int renderbuffer, int samples, int internalformat, int width, int height) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glNamedRenderbufferStorage(int renderbuffer, int internalformat, int width, int height) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -135,6 +168,46 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
         GL41C.glBindBuffer(GL41C.GL_COPY_WRITE_BUFFER, buffer);
         GL41C.glBufferData(GL41C.GL_COPY_WRITE_BUFFER, data, usage);
         GL41C.glBindBuffer(GL41C.GL_COPY_WRITE_BUFFER, prevBuffer);
+    }
+
+    @Override
+    public void glGetNamedBufferSubData(int buffer, long offset, ByteBuffer data) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int glGetNamedBufferParameteri(int buffer, int pname) {
+        final int prevBuffer = GL41C.glGetInteger(GL41C.GL_COPY_READ_BUFFER);
+        GL41C.glBindBuffer(GL41C.GL_COPY_READ_BUFFER, buffer);
+        final int[] params = new int[1];
+        GL41C.glGetBufferParameteriv(GL41C.GL_COPY_READ_BUFFER, pname, params);
+        GL41C.glBindBuffer(GL41C.GL_COPY_READ_BUFFER, prevBuffer);
+        return params[0];
+    }
+
+    @Override
+    public ByteBuffer glMapNamedBuffer(int buffer, int access) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ByteBuffer glMapNamedBufferRange(int buffer, long offset, long length, int access) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glFlushMappedNamedBufferRange(int buffer, long offset, long length) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long glGetNamedBufferParameteri64(int buffer, int pname) {
+        final int prevBuffer = GL41C.glGetInteger(GL41C.GL_COPY_READ_BUFFER);
+        GL41C.glBindBuffer(GL41C.GL_COPY_READ_BUFFER, buffer);
+        final long[] params = new long[1];
+        GL41C.glGetBufferParameteri64v(GL41C.GL_COPY_READ_BUFFER, pname, params);
+        GL41C.glBindBuffer(GL41C.GL_COPY_READ_BUFFER, prevBuffer);
+        return params[0];
     }
 
     @Override
@@ -215,6 +288,21 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
     }
 
     @Override
+    public int glGetNamedRenderbufferParameteri(int renderbuffer, int pname) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glNamedFramebufferRenderbuffer(int framebuffer, int attachment, int renderbuffertarget, int renderbuffer) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glGenerateTextureMipmap(int texture) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void glBindTextureUnit(int unit, int texture) {
         final int prevTexture = GL41C.glGetInteger(GL41C.GL_ACTIVE_TEXTURE);
         GL41C.glActiveTexture(GL41C.GL_TEXTURE0 + unit);
@@ -268,6 +356,71 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
     }
 
     @Override
+    public void glTextureSubImage3D(int texture, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, ByteBuffer pixels) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glTextureSubImage1D(int texture, int level, int xoffset, int width, int format, int type, ByteBuffer pixels) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glGetTextureSubImage(int texture, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, ByteBuffer pixels) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glClearTexImage(int texture, int level, int format, int type, float[] data) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glClearTexImage(int texture, int level, int format, int type, ByteBuffer data) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glClearTexSubImage(int texture, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, float[] data) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glClearTexSubImage(int texture, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, ByteBuffer data) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public float glGetTextureParameterf(int texture, int pname) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glTextureParameterf(int texture, int pname, float param) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glGetTextureParameteriv(int texture, int pname, int[] params) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glTextureParameteriv(int texture, int pname, int[] params) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glGetTextureParameterfv(int texture, int pname, float[] params) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glTextureParameterfv(int texture, int pname, float[] params) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void glTextureParameteri(int texture, int pname, int param) {
         final int target = getOrThrowTextureTarget(texture);
         final int prevTexture = GL41C.glGetInteger(TEXTURE_QUERY_TARGETS.get(target));
@@ -301,27 +454,102 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
     }
 
     @Override
-    public void glVertexArrayVertexBuffer(int vaobj, int bindingindex, int buffer, long offset, int stride) {
-        final Int2ObjectMap<VertexBufferState> vertexArrayState = vertexArrayStates.get(vaobj);
-        if (vertexArrayState == null) {
-            throw new IllegalArgumentException("Vertex array not found: " + vaobj);
-        }
-        if (offset != 0) {
-            throw new IllegalArgumentException("Offset must be 0 for OpenGL 4.1, got: " + offset);
-        }
+    public void glTextureBuffer(int texture, int internalformat, int buffer) {
+        throw new UnsupportedOperationException();
+    }
 
-        if (buffer != 0) {
-            vertexArrayState.put(bindingindex, new VertexBufferState(buffer, offset, stride));
-        } else {
-            vertexArrayState.remove(bindingindex);
+    @Override
+    public void glTextureStorage3D(int texture, int levels, int internalformat, int width, int height, int depth) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glTextureStorage3DMultisample(int texture, int samples, int internalformat, int width, int height, int depth, boolean fixedsamplelocations) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glTextureStorage1D(int texture, int levels, int internalformat, int width) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glVertexArrayVertexBuffer(int vaobj, int bindingindex, int buffer, long offset, int stride) {
+        VAOState state = vertexArrayStates.get(vaobj);
+        state.vertexBindings.put(bindingindex, new VertexBinding(buffer, offset, stride));
+        final int prevVertexArray = GL41C.glGetInteger(GL41C.GL_VERTEX_ARRAY_BINDING);
+        bindVAO(vaobj);
+
+        for (Map.Entry<Integer, VertexAttrib> entry : state.attributes.entrySet()) {
+            if (entry.getValue().bindingIndex == bindingindex) {
+                tryApplyAttribPointer(vaobj, entry.getKey());
+            }
         }
+        GL41C.glBindVertexArray(prevVertexArray);
     }
 
     @Override
     public void glVertexArrayElementBuffer(int vaobj, int buffer) {
         final int prevVertexArray = GL41C.glGetInteger(GL41C.GL_VERTEX_ARRAY_BINDING);
+        bindVAO(vaobj);
+        vertexArrayStates.get(vaobj).elementArrayBuffer = buffer;
         GL41C.glBindVertexArray(vaobj);
         GL41C.glBindBuffer(GL41C.GL_ELEMENT_ARRAY_BUFFER, buffer);
+        GL41C.glBindVertexArray(prevVertexArray);
+    }
+
+    @Override
+    public void glVertexArrayAttribFormat(int vaobj, int attribindex, int size, int type, boolean normalized, int relativeoffset) {
+        VertexAttrib attrib = vertexArrayStates.get(vaobj).getAttrib(attribindex);
+        attrib.format = new AttribFormat(size, type, normalized, relativeoffset);
+        attrib.iformat = null;
+        attrib.lformat = null;
+        tryApplyAttribPointer(vaobj, attribindex);
+    }
+
+    @Override
+    public void glVertexArrayAttribIFormat(int vaobj, int attribindex, int size, int type, int relativeoffset) {
+        VertexAttrib attrib = vertexArrayStates.get(vaobj).getAttrib(attribindex);
+        attrib.format = null;
+        attrib.iformat = new AttribIFormat(size, type, relativeoffset);
+        attrib.lformat = null;
+        tryApplyAttribPointer(vaobj, attribindex);
+    }
+
+    @Override
+    public void glVertexArrayAttribLFormat(int vaobj, int attribindex, int size, int type, int relativeoffset) {
+        VertexAttrib attrib = vertexArrayStates.get(vaobj).getAttrib(attribindex);
+        attrib.format = null;
+        attrib.iformat = null;
+        attrib.lformat = new AttribLFormat(size, type, relativeoffset);
+        tryApplyAttribPointer(vaobj, attribindex);
+    }
+
+    @Override
+    public void glVertexArrayAttribBinding(int vaobj, int attribindex, int bindingindex) {
+        vertexArrayStates.get(vaobj).getAttrib(attribindex).bindingIndex = bindingindex;
+        tryApplyAttribPointer(vaobj, attribindex);
+    }
+
+    @Override
+    public void glEnableVertexArrayAttrib(int vaobj, int index) {
+        vertexArrayStates.get(vaobj).enabledAttributes.add(index);
+        final int prevVertexArray = GL41C.glGetInteger(GL41C.GL_VERTEX_ARRAY_BINDING);
+        bindVAO(vaobj);
+        GL41C.glEnableVertexAttribArray(index);
+        GL41C.glBindVertexArray(prevVertexArray);
+    }
+
+    @Override
+    public void glVertexArrayBindingDivisor(int vaobj, int bindingindex, int divisor) {
+        vertexArrayStates.get(vaobj).divisors.put(bindingindex, divisor);
+        final int prevVertexArray = GL41C.glGetInteger(GL41C.GL_VERTEX_ARRAY_BINDING);
+        bindVAO(vaobj);
+        for (Map.Entry<Integer, VertexAttrib> entry : vertexArrayStates.get(vaobj).attributes.entrySet()) {
+            if (entry.getValue().bindingIndex == bindingindex) {
+                GL41C.glVertexAttribDivisor(entry.getKey(), divisor);
+            }
+        }
         GL41C.glBindVertexArray(prevVertexArray);
     }
 
@@ -339,78 +567,43 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
         GL41C.glDrawElementsInstancedBaseVertex(mode, count, type, indices, primcount, basevertex);
     }
 
-    public void configureVertexDataLayout(int vaobj, int bindingIndex, int attribOffset, VertexDataLayout vertexDataLayout, int divisor) {
-        final Int2ObjectMap<VertexBufferState> vertexArrayState = vertexArrayStates.get(vaobj);
-        if (vertexArrayState == null) {
-            throw new IllegalArgumentException("Vertex array not found: " + vaobj);
-        }
-        final VertexBufferState vertexBufferState = vertexArrayState.get(bindingIndex);
-        if (vertexBufferState == null) {
-            throw new IllegalArgumentException("Vertex buffer not found for binding index: " + bindingIndex);
-        }
-
-        final int prevVertexArray = GL41C.glGetInteger(GL41C.GL_VERTEX_ARRAY_BINDING);
-        GL41C.glBindVertexArray(vaobj);
-
-        GL41C.glBindBuffer(GL41C.GL_ARRAY_BUFFER, vertexBufferState.buffer);
-
-        int relativeOffset = 0;
-        for (int i = 0; i < vertexDataLayout.getElements().length; i++) {
-            final VertexDataLayoutElement element = vertexDataLayout.getElements()[i];
-            final int attribIndex = i + attribOffset;
-
-            GL41C.glEnableVertexAttribArray(attribIndex);
-
-            switch (element.targetDataType()) {
-                case INT -> GL41C.glVertexAttribIPointer(
-                        attribIndex,
-                        element.count(),
-                        element.dataType().getGlType(),
-                        vertexBufferState.stride,
-                        relativeOffset
-                );
-                case FLOAT, FLOAT_NORMALIZED -> {
-                    boolean normalized = (element.targetDataType() == TargetDataType.FLOAT_NORMALIZED);
-                    GL41C.glVertexAttribPointer(
-                            attribIndex,
-                            element.count(),
-                            element.dataType().getGlType(),
-                            normalized,
-                            vertexBufferState.stride,
-                            relativeOffset
-                    );
-                }
-                case DOUBLE -> GL41C.glVertexAttribLPointer(
-                        attribIndex,
-                        element.count(),
-                        element.dataType().getGlType(),
-                        vertexBufferState.stride,
-                        relativeOffset
-                );
-            }
-
-            GL41C.glVertexAttribDivisor(attribIndex, divisor);
-
-            relativeOffset += element.count() * element.dataType().getSize() + element.padding();
-        }
-
-        GL41C.glBindBuffer(GL41C.GL_ARRAY_BUFFER, 0);
-        GL41C.glBindVertexArray(prevVertexArray);
+    @Override
+    public void glMultiDrawArraysIndirect(int mode, long indirect, int drawcount, int stride) {
+        throw new UnsupportedOperationException();
     }
 
-    public void disableVertexArrayAttrib(int vaobj, int startIndex) {
-        final int prevVertexArray = GL41C.glGetInteger(GL41C.GL_VERTEX_ARRAY_BINDING);
-        GL41C.glBindVertexArray(vaobj);
-        while (true) {
-            int enabled = GL41C.glGetVertexAttribi(startIndex, GL41C.GL_VERTEX_ATTRIB_ARRAY_ENABLED);
-            if (enabled == GL41C.GL_FALSE) {
-                break;
-            }
-            GL41C.glDisableVertexAttribArray(startIndex);
-            startIndex++;
-        }
+    @Override
+    public void glMultiDrawElementsIndirect(int mode, int type, long indirect, int drawcount, int stride) {
+        throw new UnsupportedOperationException();
+    }
 
-        GL41C.glBindVertexArray(prevVertexArray);
+    @Override
+    public void glCopyImageSubData(int srcName, int srcTarget, int srcLevel, int srcX, int srcY, int srcZ, int dstName, int dstTarget, int dstLevel, int dstX, int dstY, int dstZ, int srcWidth, int srcHeight, int srcDepth) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int glGetProgramResourceIndex(int program, int programInterface, CharSequence name) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glBindImageTexture(int unit, int texture, int level, boolean layered, int layer, int access, int format) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void glShaderStorageBlockBinding(int program, int storageBlockIndex, int storageBlockBinding) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String glGetObjectLabel(int identifier, int name) {
+        return "";
+    }
+
+    @Override
+    public void glObjectLabel(int identifier, int name, CharSequence label) {
     }
 
     public void drawBuiltBuffer(BuiltBuffer builtBuffer) {
@@ -427,12 +620,57 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
         }
     }
 
-    public void setUniformMatrix4f(int glId, int location, Matrix4f matrix) {
-        try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-            final long address = memoryStack.nmalloc(Float.BYTES * 4 * 4);
-            matrix.getToAddress(address);
-            GL41C.nglProgramUniformMatrix4fv(glId, location, 1, false, address);
+    private void bindVAO(int vao) {
+        GL41C.glBindVertexArray(vao);
+        int elementBuffer = vertexArrayStates.get(vao).elementArrayBuffer;
+        if (elementBuffer != 0) {
+            GL41C.glBindBuffer(GL41C.GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
         }
+    }
+
+    private void tryApplyAttribPointer(int vaobj, int attribindex) {
+        VAOState state = vertexArrayStates.get(vaobj);
+        VertexAttrib attrib = state.getAttrib(attribindex);
+        VertexBinding binding = state.vertexBindings.get(attrib.bindingIndex);
+
+        if (binding == null) return; // No buffer bound
+        if (!attrib.isFullyDefined()) return; // Missing format or binding
+
+        final int prevVertexArray = GL41C.glGetInteger(GL41C.GL_VERTEX_ARRAY_BINDING);
+        bindVAO(vaobj);
+        GL41C.glBindBuffer(GL41C.GL_ARRAY_BUFFER, binding.buffer);
+
+        if (attrib.format != null) {
+            GL41C.glVertexAttribPointer(
+                    attribindex,
+                    attrib.format.size,
+                    attrib.format.type,
+                    attrib.format.normalized,
+                    binding.stride,
+                    binding.offset + attrib.format.relativeoffset
+            );
+        } else if (attrib.iformat != null) {
+            GL41C.glVertexAttribIPointer(
+                    attribindex,
+                    attrib.iformat.size,
+                    attrib.iformat.type,
+                    binding.stride,
+                    binding.offset + attrib.iformat.relativeoffset
+            );
+        } else if (attrib.lformat != null) {
+            GL41C.glVertexAttribLPointer(
+                    attribindex,
+                    attrib.lformat.size,
+                    attrib.lformat.type,
+                    binding.stride,
+                    binding.offset + attrib.lformat.relativeoffset
+            );
+        }
+
+        if (state.enabledAttributes.contains(attribindex)) {
+            GL41C.glEnableVertexAttribArray(attribindex);
+        }
+        GL41C.glBindVertexArray(prevVertexArray);
     }
 
     private void unbindAllTextureTargets() {
@@ -461,7 +699,79 @@ public final class AppleCommandEncoder implements GlCommandEncoder {
         return textureTargets;
     }
 
-    public record VertexBufferState(int buffer, long offset, int stride) {
+    private static class VAOState {
+
+        Int2ObjectMap<VertexBinding> vertexBindings = new Int2ObjectOpenHashMap<>();
+        Int2ObjectMap<VertexAttrib> attributes = new Int2ObjectOpenHashMap<>();
+        Int2IntMap divisors = new Int2IntOpenHashMap();
+
+        int elementArrayBuffer = 0;
+        Set<Integer> enabledAttributes = new HashSet<>();
+
+        VertexAttrib getAttrib(int index) {
+            return attributes.computeIfAbsent(index, k -> new VertexAttrib());
+        }
+    }
+
+    private static class VertexBinding {
+        int buffer;
+        long offset;
+        int stride;
+
+        VertexBinding(int buffer, long offset, int stride) {
+            this.buffer = buffer;
+            this.offset = offset;
+            this.stride = stride;
+        }
+    }
+
+    private static class VertexAttrib {
+        int bindingIndex = 0;
+        AttribFormat format = null;
+        AttribIFormat iformat = null;
+        AttribLFormat lformat = null;
+
+        boolean isFullyDefined() {
+            return (format != null || iformat != null || lformat != null);
+        }
+    }
+
+    private static class AttribFormat {
+        int size;
+        int type;
+        boolean normalized;
+        int relativeoffset;
+
+        AttribFormat(int size, int type, boolean normalized, int relativeoffset) {
+            this.size = size;
+            this.type = type;
+            this.normalized = normalized;
+            this.relativeoffset = relativeoffset;
+        }
+    }
+
+    private static class AttribIFormat {
+        int size;
+        int type;
+        int relativeoffset;
+
+        AttribIFormat(int size, int type, int relativeoffset) {
+            this.size = size;
+            this.type = type;
+            this.relativeoffset = relativeoffset;
+        }
+    }
+
+    private static class AttribLFormat {
+        int size;
+        int type;
+        int relativeoffset;
+
+        AttribLFormat(int size, int type, int relativeoffset) {
+            this.size = size;
+            this.type = type;
+            this.relativeoffset = relativeoffset;
+        }
     }
 
 }

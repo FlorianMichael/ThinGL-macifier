@@ -15,12 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.framebuffer.impl;
 
 import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.resource.framebuffer.Framebuffer;
-import net.raphimc.thingl.resource.framebuffer.FramebufferAttachment;
+import net.raphimc.thingl.resource.image.ImageStorage;
 
 public class WindowFramebuffer extends Framebuffer {
 
@@ -31,11 +30,7 @@ public class WindowFramebuffer extends Framebuffer {
     }
 
     @Override
-    public void refreshCachedData() {
-    }
-
-    @Override
-    public void checkFramebufferStatus() {
+    public void checkStatus() {
     }
 
     @Override
@@ -56,7 +51,7 @@ public class WindowFramebuffer extends Framebuffer {
     }
 
     @Override
-    public void setAttachment(final int type, final FramebufferAttachment attachment) {
+    public void setAttachment(final int attachmentPoint, final ImageStorage attachment) {
         throw new UnsupportedOperationException("Cannot set attachments on the window framebuffer");
     }
 
@@ -68,11 +63,6 @@ public class WindowFramebuffer extends Framebuffer {
     @Override
     public int getHeight() {
         return ThinGL.windowInterface().getFramebufferHeight();
-    }
-
-    @Override
-    protected int getMaxSupportedColorAttachmentCount() {
-        return 0;
     }
 
 }

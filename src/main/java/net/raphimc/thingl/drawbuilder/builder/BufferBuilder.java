@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.drawbuilder.builder;
 
+import net.lenni0451.commons.math.MathUtils;
+import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.util.MathUtil;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
@@ -257,7 +258,11 @@ public class BufferBuilder {
         if (this.limitAddress - this.cursorAddress < Float.BYTES * 3 * 3) {
             this.ensureHasEnoughSpace(Float.BYTES * 3 * 3);
         }
-        matrix.getToAddress(this.cursorAddress);
+        if (ThinGL.capabilities().supportsJomlUnsafe()) {
+            matrix.getToAddress(this.cursorAddress);
+        } else {
+            matrix.get(MemoryUtil.memFloatBuffer(this.cursorAddress, 3 * 3));
+        }
         this.cursorAddress += Float.BYTES * 3 * 3;
         return this;
     }
@@ -266,7 +271,11 @@ public class BufferBuilder {
         if (this.limitAddress - this.cursorAddress < Float.BYTES * 4 * 4) {
             this.ensureHasEnoughSpace(Float.BYTES * 4 * 4);
         }
-        matrix.getToAddress(this.cursorAddress);
+        if (ThinGL.capabilities().supportsJomlUnsafe()) {
+            matrix.getToAddress(this.cursorAddress);
+        } else {
+            matrix.get(MemoryUtil.memFloatBuffer(this.cursorAddress, 4 * 4));
+        }
         this.cursorAddress += Float.BYTES * 4 * 4;
         return this;
     }
@@ -275,7 +284,11 @@ public class BufferBuilder {
         if (this.limitAddress - this.cursorAddress < Double.BYTES * 3 * 3) {
             this.ensureHasEnoughSpace(Double.BYTES * 3 * 3);
         }
-        matrix.getToAddress(this.cursorAddress);
+        if (ThinGL.capabilities().supportsJomlUnsafe()) {
+            matrix.getToAddress(this.cursorAddress);
+        } else {
+            matrix.get(MemoryUtil.memDoubleBuffer(this.cursorAddress, 3 * 3));
+        }
         this.cursorAddress += Double.BYTES * 3 * 3;
         return this;
     }
@@ -284,14 +297,18 @@ public class BufferBuilder {
         if (this.limitAddress - this.cursorAddress < Double.BYTES * 4 * 4) {
             this.ensureHasEnoughSpace(Double.BYTES * 4 * 4);
         }
-        matrix.getToAddress(this.cursorAddress);
+        if (ThinGL.capabilities().supportsJomlUnsafe()) {
+            matrix.getToAddress(this.cursorAddress);
+        } else {
+            matrix.get(MemoryUtil.memDoubleBuffer(this.cursorAddress, 4 * 4));
+        }
         this.cursorAddress += Double.BYTES * 4 * 4;
         return this;
     }
 
     public BufferBuilder align(final int alignment) {
         final int position = this.getPosition();
-        final int alignedPosition = MathUtil.align(position, alignment);
+        final int alignedPosition = MathUtils.align(position, alignment);
         return this.skip(alignedPosition - position);
     }
 
@@ -326,7 +343,7 @@ public class BufferBuilder {
         if (this.getRemaining() < bytes) {
             if (!this.isExternallyAllocated) {
                 final int oldSize = this.getSize();
-                this.resize(MathUtil.align(oldSize + Math.max(bytes, oldSize), GROW_ALIGNMENT));
+                this.resize(MathUtils.align(oldSize + Math.max(bytes, oldSize), GROW_ALIGNMENT));
             } else {
                 throw new IllegalStateException("Buffer is full");
             }

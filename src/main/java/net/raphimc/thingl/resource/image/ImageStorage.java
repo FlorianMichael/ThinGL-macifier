@@ -15,20 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.raphimc.thingl.resource.image;
 
-package net.raphimc.thingl.resource.renderbuffer;
+public interface ImageStorage {
 
-import org.lwjgl.opengl.GL45C;
-
-public class RenderBuffer extends AbstractRenderBuffer {
-
-    public RenderBuffer(final int internalFormat, final int width, final int height) {
-        super(internalFormat, width, height);
-        GL45C.glNamedRenderbufferStorage(this.getGlId(), internalFormat, width, height);
+    default void copyTo(final ImageStorage target, final int srcX, final int srcY, final int srcZ, final int dstX, final int dstY, final int dstZ, final int width, final int height, final int depth) {
+        this.copyTo(target, 0, srcX, srcY, srcZ, 0, dstX, dstY, dstZ, width, height, depth);
     }
 
-    protected RenderBuffer(final int glId) {
-        super(glId);
-    }
+    void copyTo(final ImageStorage target, final int srcLevel, final int srcX, final int srcY, final int srcZ, final int dstLevel, final int dstX, final int dstY, final int dstZ, final int width, final int height, final int depth);
+
+    int getGlType();
+
+    int getGlId();
+
+    int getTarget();
+
+    int getInternalFormat();
+
+    int getWidth();
+
+    int getHeight();
+
+    void free();
 
 }

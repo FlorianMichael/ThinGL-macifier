@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.raphimc.thingl.util.pool;
 
 import it.unimi.dsi.fastutil.objects.Reference2LongMap;
@@ -24,10 +23,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import it.unimi.dsi.fastutil.objects.ReferenceList;
 import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.framebuffer.impl.TextureFramebuffer;
-import net.raphimc.thingl.resource.texture.Texture2D;
-import org.jetbrains.annotations.ApiStatus;
-import org.lwjgl.opengl.GL30C;
-import org.lwjgl.opengl.GL45C;
+import net.raphimc.thingl.resource.image.texture.Texture2D;
 
 public class FramebufferPool {
 
@@ -35,9 +31,8 @@ public class FramebufferPool {
     private final ReferenceList<TextureFramebuffer> inUse = new ReferenceArrayList<>();
     private final Reference2LongMap<TextureFramebuffer> framebufferAccessTime = new Reference2LongOpenHashMap<>();
 
-    @ApiStatus.Internal
-    public FramebufferPool(final ThinGL thinGL) {
-        thinGL.addFinishFrameCallback(() -> {
+    public FramebufferPool() {
+        ThinGL.get().addFinishFrameCallback(() -> {
             if (!this.inUse.isEmpty()) {
                 ThinGL.LOGGER.warn(this.inUse.size() + " Framebuffer(s) were not returned to the pool. Forcibly reclaiming them.");
                 this.free.addAll(this.inUse);
@@ -84,7 +79,6 @@ public class FramebufferPool {
         if (!this.inUse.remove(framebuffer)) {
             throw new IllegalStateException("Framebuffer is not part of the pool");
         }
-        de.florianmichael.thingl.GlCommands.get().glInvalidateNamedFramebufferData(framebuffer.getGlId(), new int[]{GL30C.GL_COLOR_ATTACHMENT0, GL30C.GL_DEPTH_STENCIL_ATTACHMENT}); // FlorianMichael - add macOS support
         this.free.add(framebuffer);
     }
 
@@ -92,7 +86,6 @@ public class FramebufferPool {
         return this.free.size() + this.inUse.size();
     }
 
-    @ApiStatus.Internal
     public void free() {
         for (TextureFramebuffer framebuffer : this.free) {
             framebuffer.freeFully();
