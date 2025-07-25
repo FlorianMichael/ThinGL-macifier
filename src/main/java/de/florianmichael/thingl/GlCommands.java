@@ -44,12 +44,4 @@ public class GlCommands {
         return apple;
     }
 
-    public static AppleCommandEncoder getAppleOrNull() {
-        if (instance instanceof AppleCommandEncoder appleCommandEncoder) {
-            return appleCommandEncoder;
-        } else {
-            return null;
-        }
-    }
-
 }
