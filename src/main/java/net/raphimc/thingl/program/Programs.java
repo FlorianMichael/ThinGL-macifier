@@ -36,32 +36,32 @@ public class Programs {
 
     private final Map<String, Shader> shaders = new HashMap<>();
 
-    private final Lazy<RegularProgram> positionColor = Lazy.of(() -> {
-        final RegularProgram program = new RegularProgram(this.getShader("regular/position_color", VERTEX), this.getShader("regular/position_color", FRAGMENT));
-        program.setDebugName("position_color");
+    private final Lazy<RegularProgram> color = Lazy.of(() -> {
+        final RegularProgram program = new RegularProgram(this.getShader("regular/color", VERTEX), this.getShader("regular/color", FRAGMENT));
+        program.setDebugName("color");
         return program;
     });
 
-    private final Lazy<RegularProgram> positionTexture = Lazy.of(() -> {
-        final RegularProgram program = new RegularProgram(this.getShader("regular/position_texture", VERTEX), this.getShader("regular/position_texture", FRAGMENT));
-        program.setDebugName("position_texture");
+    private final Lazy<RegularProgram> texture = Lazy.of(() -> {
+        final RegularProgram program = new RegularProgram(this.getShader("regular/texture", VERTEX), this.getShader("regular/texture", FRAGMENT));
+        program.setDebugName("texture");
         return program;
     });
 
-    private final Lazy<RegularProgram> positionTextureArray = Lazy.of(() -> {
-        final RegularProgram program = new RegularProgram(this.getShader("regular/position_texture_array", VERTEX), this.getShader("regular/position_texture_array", FRAGMENT));
-        program.setDebugName("position_texture_array");
+    private final Lazy<RegularProgram> textureArrayLayer = Lazy.of(() -> {
+        final RegularProgram program = new RegularProgram(this.getShader("regular/texture_array_layer", VERTEX), this.getShader("regular/texture_array_layer", FRAGMENT));
+        program.setDebugName("texture_array_layer");
         return program;
     });
 
-    private final Lazy<RegularProgram> positionColorTexture = Lazy.of(() -> {
-        final RegularProgram program = new RegularProgram(this.getShader("regular/position_color_texture", VERTEX), this.getShader("regular/position_color_texture", FRAGMENT));
-        program.setDebugName("position_color_texture");
+    private final Lazy<RegularProgram> coloredTexture = Lazy.of(() -> {
+        final RegularProgram program = new RegularProgram(this.getShader("regular/colored_texture", VERTEX), this.getShader("regular/colored_texture", FRAGMENT));
+        program.setDebugName("colored_texture");
         return program;
     });
 
     private final Lazy<RegularProgram> colorizedTexture = Lazy.of(() -> {
-        final RegularProgram program = new RegularProgram(this.getShader("regular/position_color_texture", VERTEX), this.getShader("regular/colorized_texture", FRAGMENT));
+        final RegularProgram program = new RegularProgram(this.getShader("regular/colored_texture", VERTEX), this.getShader("regular/colorized_texture", FRAGMENT));
         program.setDebugName("colorized_texture");
         return program;
     });
@@ -77,9 +77,16 @@ public class Programs {
         program.setDebugName("bitmap_text");
         return program;
     });
+
     private final Lazy<RegularProgram> sdfText = Lazy.of(() -> {
         final RegularProgram program = new RegularProgram(this.getShader("regular/sdf_text", VERTEX), this.getShader("regular/sdf_text", FRAGMENT));
         program.setDebugName("sdf_text");
+        return program;
+    });
+
+    private final Lazy<RegularProgram> skyBox = Lazy.of(() -> {
+        final RegularProgram program = new RegularProgram(this.getShader("regular/sky_box", VERTEX), this.getShader("regular/sky_box", FRAGMENT));
+        program.setDebugName("sky_box");
         return program;
     });
 
@@ -125,37 +132,38 @@ public class Programs {
         return program;
     });
 
-    private final Lazy<RegularProgram> instancedPositionColor = Lazy.of(() -> {
-        final RegularProgram program = new RegularProgram(this.getShader("instancing/position_color", VERTEX), this.getShader("regular/position_color", FRAGMENT));
-        program.setDebugName("instanced_position_color");
+    private final Lazy<RegularProgram> instancedColor = Lazy.of(() -> {
+        final RegularProgram program = new RegularProgram(this.getShader("instancing/color", VERTEX), this.getShader("regular/color", FRAGMENT));
+        program.setDebugName("instanced_color");
         return program;
     });
 
-    private final Lazy<RegularProgram> multidrawPositionColor = Lazy.of(() -> {
-        final RegularProgram program = new RegularProgram(this.getShader("multidraw/position_color", VERTEX), this.getShader("regular/position_color", FRAGMENT));
-        program.setDebugName("multidraw_position_color");
+    private final Lazy<RegularProgram> multidrawColor = Lazy.of(() -> {
+        final RegularProgram program = new RegularProgram(this.getShader("multidraw/color", VERTEX), this.getShader("regular/color", FRAGMENT));
+        program.setDebugName("multidraw_color");
         return program;
     });
+
     private final Lazy<RegularProgram> multidrawLine = Lazy.of(() -> {
         final RegularProgram program = new RegularProgram(this.getShader("multidraw/line", VERTEX), this.getShader("geometry/line", GEOMETRY), this.getShader("geometry/line", FRAGMENT));
         program.setDebugName("multidraw_line");
         return program;
     });
 
-    public RegularProgram getPositionColor() {
-        return this.positionColor.get();
+    public RegularProgram getColor() {
+        return this.color.get();
     }
 
-    public RegularProgram getPositionTexture() {
-        return this.positionTexture.get();
+    public RegularProgram getTexture() {
+        return this.texture.get();
     }
 
-    public RegularProgram getPositionTextureArray() {
-        return this.positionTextureArray.get();
+    public RegularProgram getTextureArrayLayer() {
+        return this.textureArrayLayer.get();
     }
 
-    public RegularProgram getPositionColorTexture() {
-        return this.positionColorTexture.get();
+    public RegularProgram getColoredTexture() {
+        return this.coloredTexture.get();
     }
 
     public RegularProgram getColorizedTexture() {
@@ -172,6 +180,10 @@ public class Programs {
 
     public RegularProgram getSdfText() {
         return this.sdfText.get();
+    }
+
+    public RegularProgram getSkyBox() {
+        return this.skyBox.get();
     }
 
     public GaussianBlurProgram getGaussianBlur() {
@@ -202,12 +214,12 @@ public class Programs {
         return this.msaa.get();
     }
 
-    public RegularProgram getInstancedPositionColor() {
-        return this.instancedPositionColor.get();
+    public RegularProgram getInstancedColor() {
+        return this.instancedColor.get();
     }
 
-    public RegularProgram getMultidrawPositionColor() {
-        return this.multidrawPositionColor.get();
+    public RegularProgram getMultidrawColor() {
+        return this.multidrawColor.get();
     }
 
     public RegularProgram getMultidrawLine() {
