@@ -336,22 +336,29 @@ public class BufferRenderer {
             }
         }
 
-        if (drawCommands.size() == 1) {
-            final DrawCommand drawCommand = drawCommands.get(0);
-            if (drawCommand instanceof DrawElementsCommand drawElementsCommand) {
-                vertexArray.drawElements(drawMode, drawElementsCommand.vertexCount(), drawElementsCommand.firstIndex(), drawElementsCommand.instanceCount(), drawElementsCommand.baseVertex(), drawElementsCommand.baseInstance());
-            } else if (drawCommand instanceof DrawArraysCommand drawArraysCommand) {
-                vertexArray.drawArrays(drawMode, drawArraysCommand.vertexCount(), drawArraysCommand.firstVertex(), drawArraysCommand.instanceCount(), drawArraysCommand.baseInstance());
-            }
-        } else if (builtBuffer.commandBuffer() != null) {
-            if (vertexArray.getIndexBuffer() != null) {
-                vertexArray.drawElementsIndirect(drawMode, builtBuffer.commandBuffer(), 0, drawCommands.size());
-            } else {
-                vertexArray.drawArraysIndirect(drawMode, builtBuffer.commandBuffer(), 0, drawCommands.size());
-            }
+        // FlorianMichael - add macOS support
+        final de.florianmichael.thingl.encoder.GlCommandEncoder encoder = de.florianmichael.thingl.GlCommands.get();
+        if (encoder instanceof final de.florianmichael.thingl.encoder.AppleCommandEncoder appleEncoder) {
+            appleEncoder.drawBuiltBuffer(builtBuffer);
         } else {
-            throw new IllegalStateException("Draw calls with multiple draw commands require a command buffer");
+            if (drawCommands.size() == 1) {
+                final DrawCommand drawCommand = drawCommands.get(0);
+                if (drawCommand instanceof DrawElementsCommand drawElementsCommand) {
+                    vertexArray.drawElements(drawMode, drawElementsCommand.vertexCount(), drawElementsCommand.firstIndex(), drawElementsCommand.instanceCount(), drawElementsCommand.baseVertex(), drawElementsCommand.baseInstance());
+                } else if (drawCommand instanceof DrawArraysCommand drawArraysCommand) {
+                    vertexArray.drawArrays(drawMode, drawArraysCommand.vertexCount(), drawArraysCommand.firstVertex(), drawArraysCommand.instanceCount(), drawArraysCommand.baseInstance());
+                }
+            } else if (builtBuffer.commandBuffer() != null) {
+                if (vertexArray.getIndexBuffer() != null) {
+                    vertexArray.drawElementsIndirect(drawMode, builtBuffer.commandBuffer(), 0, drawCommands.size());
+                } else {
+                    vertexArray.drawArraysIndirect(drawMode, builtBuffer.commandBuffer(), 0, drawCommands.size());
+                }
+            } else {
+                throw new IllegalStateException("Draw calls with multiple draw commands require a command buffer");
+            }
         }
+        // FlorianMichael - add macOS support
 
         if (program != null) {
             program.unbind();
