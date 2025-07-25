@@ -14,7 +14,11 @@ Changes in the source code are marked with comments for clarity
 // FlorianMichael - do change xy
 ```
 
----
+An exception to this are the GL42C+ replaces inside the resource package. During merge conflicts, drop our changes and run `python gl_replacements.py`
+
+-----
+
+Run `python merge_upstream.py` to add upstream commits. Resolve merge conflicts and `git commit --amend` into the merge commit.
 
 ## Include via JitPack
 
@@ -53,7 +57,7 @@ Replace `VERSION` with a tag, release, or commit hash from this repository.
 
 ```kotlin
 dependencies {
-    implementation("com.github.EnZaXD:ThinGL-macifier:VERSION")
+    implementation("com.github.FlorianMichael:ThinGL-macifier:VERSION")
 }
 ```
 
@@ -64,7 +68,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.github.EnZaXD:ThinGL-macifier:VERSION'
+    implementation 'com.github.FlorianMichael:ThinGL-macifier:VERSION'
 }
 ```
 
