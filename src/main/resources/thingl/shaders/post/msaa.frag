@@ -1,4 +1,4 @@
-#version 450 core
+#version 410 core
 
 uniform sampler2DMS u_Input;
 
@@ -7,7 +7,7 @@ out vec4 o_Color;
 
 void main() {
     ivec2 texPos = ivec2(v_VpTexCoord * textureSize(u_Input));
-    int samples = textureSamples(u_Input);
+    // int samples = textureSamples(u_Input); // FlorianMichael - macOS support
 
     vec4 colorSum = vec4(0);
     for (int i = 0; i < samples; i++) {

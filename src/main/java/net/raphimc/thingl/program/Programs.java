@@ -127,7 +127,11 @@ public class Programs {
     });
 
     private final Lazy<MSAAProgram> msaa = Lazy.of(() -> {
-        final MSAAProgram program = new MSAAProgram(this.getShader("post/post_processing", Shader.Type.VERTEX), this.getShader("post/msaa", Shader.Type.FRAGMENT), 4);
+        // FlorianMichael - macOS support
+        final Map<String, Object> defines = new HashMap<>();
+        defines.put("samples", 4);
+        final MSAAProgram program = new MSAAProgram(this.getShader("post/post_processing", Shader.Type.VERTEX), this.getShader("post/msaa", Shader.Type.FRAGMENT, defines), 4);
+        // FlorianMichael - macOS support
         program.setDebugName("msaa");
         return program;
     });
