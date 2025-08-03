@@ -61,11 +61,14 @@ public class Capabilities {
             this.nvFramebufferMixedSamplesMaxRasterSamples = 0;
         }
 
-        this.supportsJomlUnsafe = tryRun(() -> {
-            try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-                RenderMathUtil.getIdentityMatrix().getToAddress(memoryStack.nmalloc(Float.BYTES * 4 * 4));
-            }
-        });
+        // FlorianMichael - macOS support
+        //this.supportsJomlUnsafe = tryRun(() -> {
+        //    try (MemoryStack memoryStack = MemoryStack.stackPush()) {
+        //        RenderMathUtil.getIdentityMatrix().getToAddress(memoryStack.nmalloc(Float.BYTES * 4 * 4));
+        //    }
+        //});
+        this.supportsJomlUnsafe = !de.florianmichael.thingl.GlCommands.isApple();
+        // FlorianMichael - macOS support
     }
 
     public void ensureFreeTypePresent() {
