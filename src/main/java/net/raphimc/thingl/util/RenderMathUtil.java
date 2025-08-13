@@ -21,7 +21,6 @@ import net.lenni0451.commons.math.MathUtils;
 import net.raphimc.thingl.ThinGL;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.primitives.Rectanglei;
 
@@ -49,21 +48,28 @@ public class RenderMathUtil {
         return IDENTITY_MATRIX;
     }
 
-    public static Rectanglei getScreenRect(final Matrix4f positionMatrix, final float x1, final float y1, final float x2, final float y2) {
-        final Vector3f start = new Vector3f(x1, y1, 0);
-        final Vector3f end = new Vector3f(x2, y2, 0);
-        if (positionMatrix != null && (positionMatrix.properties() & Matrix4fc.PROPERTY_IDENTITY) == 0) {
-            positionMatrix.transformPosition(start);
-            positionMatrix.transformPosition(end);
-        }
+    public static Matrix4f getMvpMatrix(final Matrix4f positionMatrix) {
+        return new Matrix4f().mul(ThinGL.globalUniforms().getProjectionMatrix()).mul(ThinGL.globalUniforms().getViewMatrix()).mul(positionMatrix);
+    }
 
-        final Vector2f scale = ThinGL.applicationInterface().get2DScaleFactor();
-        return new Rectanglei(
-                MathUtils.floorInt(start.x * scale.x),
-                MathUtils.floorInt((MathUtils.ceilInt(ThinGL.applicationInterface().getCurrentFramebuffer().getHeight() / scale.y) - end.y) * scale.y),
-                MathUtils.ceilInt(end.x * scale.x),
-                MathUtils.ceilInt((MathUtils.ceilInt(ThinGL.applicationInterface().getCurrentFramebuffer().getHeight() / scale.y) - start.y) * scale.y)
-        );
+    public static Rectanglei getWindowRectangle(final Matrix4f positionMatrix, final float xtl, final float ytl, final float xbr, final float ybr) {
+        return getWindowRectangle(positionMatrix, xtl, ytl, xbr, ybr, false);
+    }
+
+    public static Rectanglei getWindowRectangle(final Matrix4f positionMatrix, final float xtl, final float ytl, final float xbr, final float ybr, final boolean flipY) {
+        final int[] viewport = ThinGL.glStateManager().getViewport().toArray();
+        final Matrix4f mvpMatrix = RenderMathUtil.getMvpMatrix(positionMatrix);
+        final Vector3f topLeft = new Vector3f(xtl, ytl, 0F);
+        final Vector3f bottomRight = new Vector3f(xbr, ybr, 0F);
+
+        mvpMatrix.project(topLeft, viewport, topLeft);
+        mvpMatrix.project(bottomRight, viewport, bottomRight);
+
+        if (flipY) {
+            return new Rectanglei(MathUtils.floorInt(topLeft.x), MathUtils.floorInt(viewport[3] - topLeft.y), MathUtils.ceilInt(bottomRight.x), MathUtils.ceilInt(viewport[3] - bottomRight.y));
+        } else {
+            return new Rectanglei(MathUtils.floorInt(topLeft.x), MathUtils.floorInt(bottomRight.y), MathUtils.ceilInt(bottomRight.x), MathUtils.ceilInt(topLeft.y));
+        }
     }
 
 }

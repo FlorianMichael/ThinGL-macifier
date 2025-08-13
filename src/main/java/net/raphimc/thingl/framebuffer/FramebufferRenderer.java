@@ -20,8 +20,6 @@ package net.raphimc.thingl.framebuffer;
 import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.resource.framebuffer.Framebuffer;
 import net.raphimc.thingl.resource.image.texture.Texture2D;
-import net.raphimc.thingl.util.RenderMathUtil;
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL14C;
 import org.lwjgl.opengl.GL30C;
@@ -49,16 +47,18 @@ public class FramebufferRenderer {
     }
 
     public void begin() {
+        ThinGL.globalUniforms().getProjectionMatrix().pushMatrix().setOrtho(0F, this.framebuffer.getWidth(), this.framebuffer.getHeight(), 0F, -1000F, 1000F);
+        ThinGL.globalUniforms().getViewMatrix().pushMatrix().identity();
         ThinGL.glStateStack().pushFramebuffer();
-        this.framebuffer.bind(true);
-        ThinGL.applicationInterface().pushProjectionMatrix(new Matrix4f().setOrtho(0F, this.framebuffer.getWidth(), this.framebuffer.getHeight(), 0F, -1000F, 1000F));
-        ThinGL.applicationInterface().pushViewMatrix(RenderMathUtil.getIdentityMatrix());
+        ThinGL.glStateStack().pushViewport();
+        this.framebuffer.bindAndConfigureViewport();
     }
 
     public void end() {
-        ThinGL.applicationInterface().popViewMatrix();
-        ThinGL.applicationInterface().popProjectionMatrix();
-        ThinGL.glStateStack().popFramebuffer(true);
+        ThinGL.glStateStack().popViewport();
+        ThinGL.glStateStack().popFramebuffer();
+        ThinGL.globalUniforms().getViewMatrix().popMatrix();
+        ThinGL.globalUniforms().getProjectionMatrix().popMatrix();
     }
 
     public void clear() {

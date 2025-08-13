@@ -20,38 +20,35 @@ import net.lenni0451.commons.color.Color;
 import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.implementation.application.StandaloneApplicationRunner;
 import org.joml.Matrix4fStack;
+import org.joml.primitives.AABBf;
 
-public class AntiAliasingExample extends StandaloneApplicationRunner {
+public class Minimal3DExample extends StandaloneApplicationRunner {
 
     public static void main(String[] args) {
-        new AntiAliasingExample().launch();
+        new Minimal3DExample().launch();
     }
 
-    public AntiAliasingExample() {
-        super(new Configuration().setWindowTitle("ThinGL Example - AntiAliasing").setExtendedDebugMode(true));
+    public Minimal3DExample() {
+        super(new Configuration().setWindowTitle("ThinGL Example - Minimal 3D Example").setExtendedDebugMode(true));
     }
 
     @Override
     protected void render(final Matrix4fStack positionMatrix) {
-        ThinGL.programs().getMsaa().bindInput();
+        positionMatrix.rotateY((float) Math.toRadians((System.currentTimeMillis() % 3600L) / 10F));
 
-        final float rectX = 100;
-        final float rectY = 100;
-        final float rectW = 300;
-        final float rectH = 200;
-        final float centerX = rectX + rectW / 2F;
-        final float centerY = rectY + rectH / 2F;
-        final float angle = (System.currentTimeMillis() % 8000) / 8000F * (float) Math.PI * 2;
+        final AABBf box = new AABBf(-0.5F, -0.5F, -0.5F, 0.5F, 0.5F, 0.5F);
+        ThinGL.renderer3D().outlineBox(positionMatrix, box, 2, Color.GREEN);
+    }
 
-        positionMatrix.translate(centerX, centerY, 0);
-        positionMatrix.rotateZ(angle);
-        positionMatrix.translate(-rectW / 2F, -rectH / 2F, 0);
+    @Override
+    protected void loadProjectionMatrix(final float width, final float height) {
+        ThinGL.globalUniforms().getProjectionMatrix().setPerspective((float) Math.toRadians(90F), width / height, 0.1F, 1000F);
 
-        ThinGL.renderer2D().filledRoundedRectangle(positionMatrix, 0, 0, rectW, rectH, 40, Color.GRAY);
-
-        ThinGL.programs().getMsaa().unbindInput();
-        ThinGL.programs().getMsaa().renderFullscreen();
-        ThinGL.programs().getMsaa().clearInput();
+        ThinGL.globalUniforms().getViewMatrix().setLookAt(
+                1F, 1F, 1F,
+                0F, 0F, 0F,
+                0F, 1F, 0F
+        );
     }
 
 }

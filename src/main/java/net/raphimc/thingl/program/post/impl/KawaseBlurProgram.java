@@ -19,8 +19,8 @@ package net.raphimc.thingl.program.post.impl;
 
 import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.program.post.MultiPassAuxInputPostProcessingProgram;
-import net.raphimc.thingl.resource.framebuffer.Framebuffer;
 import net.raphimc.thingl.resource.shader.Shader;
+import net.raphimc.thingl.wrapper.GLStateManager;
 
 public class KawaseBlurProgram extends MultiPassAuxInputPostProcessingProgram {
 
@@ -37,12 +37,12 @@ public class KawaseBlurProgram extends MultiPassAuxInputPostProcessingProgram {
     }
 
     @Override
-    protected void renderQuad0(final float x1, final float y1, final float x2, final float y2) {
-        final Framebuffer currentFramebuffer = ThinGL.applicationInterface().getCurrentFramebuffer();
-        if (x1 == 0 && y1 == 0 && x2 == currentFramebuffer.getWidth() && y2 == currentFramebuffer.getHeight()) {
-            super.renderQuad0(x1, y1, x2, y2);
+    protected void renderInternal(final float xtl, final float ytl, final float xbr, final float ybr) {
+        final GLStateManager.Viewport viewport = ThinGL.glStateManager().getViewport();
+        if (xtl == 0 && ytl == 0 && xbr == viewport.width() && ybr == viewport.height()) {
+            super.renderInternal(xtl, ytl, xbr, ybr);
         } else {
-            throw new UnsupportedOperationException("KawaseBlurProgram does not support rendering a sub-rectangle of the framebuffer. Call renderFullscreenQuad instead.");
+            throw new UnsupportedOperationException("KawaseBlurProgram does not support rendering a sub-rectangle of the framebuffer. Call renderFullscreen instead.");
         }
     }
 

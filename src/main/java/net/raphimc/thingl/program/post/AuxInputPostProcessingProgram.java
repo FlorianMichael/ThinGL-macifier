@@ -35,15 +35,15 @@ public abstract class AuxInputPostProcessingProgram extends PostProcessingProgra
     }
 
     public void bindInput() {
+        if (this.inputFramebuffer == null) {
+            this.inputFramebuffer = ThinGL.framebufferPool().borrowFramebuffer(GL11C.GL_LINEAR);
+        }
         ThinGL.glStateStack().push();
         ThinGL.glStateStack().disable(GL11C.GL_DEPTH_TEST);
         ThinGL.glStateStack().disable(GL11C.GL_STENCIL_TEST);
         ThinGL.glStateStack().pushBlendFunc();
         Blending.alphaWithAdditiveAlphaBlending();
         ThinGL.glStateStack().pushFramebuffer();
-        if (this.inputFramebuffer == null) {
-            this.inputFramebuffer = ThinGL.framebufferPool().borrowFramebuffer(GL11C.GL_LINEAR);
-        }
         this.inputFramebuffer.bind();
     }
 
@@ -75,6 +75,14 @@ public abstract class AuxInputPostProcessingProgram extends PostProcessingProgra
     public void bind() {
         super.bind();
         this.setUniformSampler("u_Input", this.inputFramebuffer);
+    }
+
+    @Override
+    protected void prepareAndRenderInternal(final float xtl, final float ytl, final float xbr, final float ybr) {
+        ThinGL.glStateStack().pushViewport();
+        this.inputFramebuffer.configureViewport();
+        super.prepareAndRenderInternal(xtl, ytl, xbr, ybr);
+        ThinGL.glStateStack().popViewport();
     }
 
 }

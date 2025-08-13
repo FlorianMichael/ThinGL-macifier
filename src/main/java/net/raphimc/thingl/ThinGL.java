@@ -22,8 +22,9 @@ import net.lenni0451.commons.logging.LoggerFactory;
 import net.raphimc.thingl.drawbuilder.drawbatchdataholder.ImmediateMultiDrawBatchDataHolder;
 import net.raphimc.thingl.drawbuilder.index.QuadIndexBuffer;
 import net.raphimc.thingl.implementation.Capabilities;
+import net.raphimc.thingl.implementation.Config;
+import net.raphimc.thingl.implementation.GlobalUniforms;
 import net.raphimc.thingl.implementation.Workarounds;
-import net.raphimc.thingl.implementation.application.ApplicationInterface;
 import net.raphimc.thingl.implementation.window.WindowInterface;
 import net.raphimc.thingl.program.Programs;
 import net.raphimc.thingl.renderer.impl.Renderer2D;
@@ -68,12 +69,12 @@ public class ThinGL {
         return get().getWindowInterface();
     }
 
-    public static ApplicationInterface applicationInterface() {
-        return get().getApplicationInterface();
-    }
-
     public static GLStateManager glStateManager() {
         return get().getGLStateManager();
+    }
+
+    public static Config config() {
+        return get().getConfig();
     }
 
     public static Capabilities capabilities() {
@@ -116,6 +117,10 @@ public class ThinGL {
         return get().getGlobalDrawBatch();
     }
 
+    public static GlobalUniforms globalUniforms() {
+        return get().getGlobalUniforms();
+    }
+
     public static BufferBuilderPool bufferBuilderPool() {
         return get().getBufferBuilderPool();
     }
@@ -146,7 +151,7 @@ public class ThinGL {
 
     private final Thread renderThread;
     private final WindowInterface windowInterface;
-    private final ApplicationInterface applicationInterface;
+    private final Config config;
     private final GLStateManager glStateManager;
     private final Capabilities capabilities;
     private final Workarounds workarounds;
@@ -159,6 +164,7 @@ public class ThinGL {
     private final Renderer3D renderer3D;
     private final RendererText rendererText;
 
+    private final GlobalUniforms globalUniforms;
     private final ImmediateMultiDrawBatchDataHolder globalDrawBatch;
     private final BufferBuilderPool bufferBuilderPool;
     private final GpuBufferPool gpuBufferPool;
@@ -179,44 +185,41 @@ public class ThinGL {
     private int fpsCounter = 0;
     private int fps = 0;
 
-    public ThinGL(final Supplier<ApplicationInterface> applicationInterface, final Supplier<WindowInterface> windowInterface) {
-        this(applicationInterface, windowInterface.get());
+    public ThinGL(final Supplier<WindowInterface> windowInterface) {
+        this(windowInterface.get());
     }
 
-    public ThinGL(final Supplier<ApplicationInterface> applicationInterface, final WindowInterface windowInterface) {
+    public ThinGL(final WindowInterface windowInterface) {
         if (INSTANCE != null) {
             throw new IllegalStateException("ThinGL has already been initialized");
         }
         INSTANCE = this;
         this.renderThread = Thread.currentThread();
         this.windowInterface = windowInterface;
-        this.applicationInterface = applicationInterface.get();
-        this.glStateManager = new TrackingGLStateManager();
-        this.capabilities = new Capabilities();
-        this.workarounds = new Workarounds();
-        this.glStateStack = new GLStateStack();
-        this.scissorStack = new ScissorStack();
-        this.stencilStack = new StencilStack();
-        this.programs = new Programs();
-        this.renderer2D = new Renderer2D();
-        this.renderer3D = new Renderer3D();
-        this.rendererText = new RendererText(new BSDFTextRenderer());
-        this.globalDrawBatch = new ImmediateMultiDrawBatchDataHolder();
-        this.bufferBuilderPool = new BufferBuilderPool();
-        this.gpuBufferPool = new GpuBufferPool();
-        this.framebufferPool = new FramebufferPool();
-        this.immediateVertexArrays = new ImmediateVertexArrays();
-        this.quadIndexBuffer = new QuadIndexBuffer();
-        this.syncManager = new SyncManager();
-        if (this.capabilities.isFreeTypePresent()) {
-            this.freeTypeLibrary = new FreeTypeLibrary();
-            if (this.capabilities.isHarfBuzzPresent()) {
-                Configuration.HARFBUZZ_LIBRARY_NAME.set(FreeType.getLibrary());
-            }
-        } else {
-            this.freeTypeLibrary = null;
-        }
+        this.config = this.createConfig();
+        this.glStateManager = this.createGLStateManager();
+        this.capabilities = this.createCapabilities();
+        this.workarounds = this.createWorkarounds();
+        this.glStateStack = this.createGLStateStack();
+        this.scissorStack = this.createScissorStack();
+        this.stencilStack = this.createStencilStack();
+        this.programs = this.createPrograms();
+        this.renderer2D = this.createRenderer2D();
+        this.renderer3D = this.createRenderer3D();
+        this.rendererText = this.createRendererText();
+        this.globalUniforms = this.createGlobalUniforms();
+        this.globalDrawBatch = this.createGlobalDrawBatch();
+        this.bufferBuilderPool = this.createBufferBuilderPool();
+        this.gpuBufferPool = this.createGpuBufferPool();
+        this.framebufferPool = this.createFramebufferPool();
+        this.immediateVertexArrays = this.createImmediateVertexArrays();
+        this.quadIndexBuffer = this.createQuadIndexBuffer();
+        this.syncManager = this.createSyncManager();
+        this.freeTypeLibrary = this.createFreeTypeLibrary();
 
+        if (this.capabilities.isFreeTypePresent() && this.capabilities.isHarfBuzzPresent()) {
+            Configuration.HARFBUZZ_LIBRARY_NAME.set(FreeType.getLibrary());
+        }
         this.addFinishFrameCallback(() -> {
             if (this.globalDrawBatch.hasDrawBatches()) {
                 this.globalDrawBatch.free();
@@ -339,12 +342,12 @@ public class ThinGL {
         return this.windowInterface;
     }
 
-    public ApplicationInterface getApplicationInterface() {
-        return this.applicationInterface;
-    }
-
     public GLStateManager getGLStateManager() {
         return this.glStateManager;
+    }
+
+    public Config getConfig() {
+        return this.config;
     }
 
     public Capabilities getCapabilities() {
@@ -387,6 +390,10 @@ public class ThinGL {
         return this.globalDrawBatch;
     }
 
+    public GlobalUniforms getGlobalUniforms() {
+        return this.globalUniforms;
+    }
+
     public BufferBuilderPool getBufferBuilderPool() {
         return this.bufferBuilderPool;
     }
@@ -413,6 +420,90 @@ public class ThinGL {
 
     public FreeTypeLibrary getFreeTypeLibrary() {
         return this.freeTypeLibrary;
+    }
+
+    protected Config createConfig() {
+        return new Config();
+    }
+
+    protected GLStateManager createGLStateManager() {
+        return new TrackingGLStateManager();
+    }
+
+    protected Capabilities createCapabilities() {
+        return new Capabilities();
+    }
+
+    protected Workarounds createWorkarounds() {
+        return new Workarounds();
+    }
+
+    protected GLStateStack createGLStateStack() {
+        return new GLStateStack();
+    }
+
+    protected ScissorStack createScissorStack() {
+        return new ScissorStack();
+    }
+
+    protected StencilStack createStencilStack() {
+        return new StencilStack();
+    }
+
+    protected Programs createPrograms() {
+        return new Programs();
+    }
+
+    protected Renderer2D createRenderer2D() {
+        return new Renderer2D();
+    }
+
+    protected Renderer3D createRenderer3D() {
+        return new Renderer3D();
+    }
+
+    protected RendererText createRendererText() {
+        return new RendererText(new BSDFTextRenderer());
+    }
+
+    protected GlobalUniforms createGlobalUniforms() {
+        return new GlobalUniforms();
+    }
+
+    protected ImmediateMultiDrawBatchDataHolder createGlobalDrawBatch() {
+        return new ImmediateMultiDrawBatchDataHolder();
+    }
+
+    protected BufferBuilderPool createBufferBuilderPool() {
+        return new BufferBuilderPool();
+    }
+
+    protected GpuBufferPool createGpuBufferPool() {
+        return new GpuBufferPool();
+    }
+
+    protected FramebufferPool createFramebufferPool() {
+        return new FramebufferPool();
+    }
+
+    protected ImmediateVertexArrays createImmediateVertexArrays() {
+        return new ImmediateVertexArrays();
+    }
+
+    protected QuadIndexBuffer createQuadIndexBuffer() {
+        return new QuadIndexBuffer();
+    }
+
+    protected SyncManager createSyncManager() {
+        return new SyncManager();
+    }
+
+    protected FreeTypeLibrary createFreeTypeLibrary() {
+        if (this.capabilities.isFreeTypePresent()) {
+            return new FreeTypeLibrary();
+        } else {
+            return null;
+        }
     }
 
 }

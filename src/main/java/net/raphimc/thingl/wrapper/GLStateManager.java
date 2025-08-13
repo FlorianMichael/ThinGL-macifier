@@ -17,6 +17,8 @@
  */
 package net.raphimc.thingl.wrapper;
 
+import net.raphimc.thingl.resource.framebuffer.Framebuffer;
+import org.joml.primitives.Rectanglei;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL14C;
 import org.lwjgl.opengl.GL20C;
@@ -51,6 +53,10 @@ public class GLStateManager {
                 GL11C.glGetInteger(GL14C.GL_BLEND_SRC_ALPHA),
                 GL11C.glGetInteger(GL14C.GL_BLEND_DST_ALPHA)
         );
+    }
+
+    public void setBlendFunc(final BlendFunc blendFunc) {
+        this.setBlendFunc(blendFunc.srcRGB, blendFunc.dstRGB, blendFunc.srcAlpha, blendFunc.dstAlpha);
     }
 
     public void setBlendFunc(final int src, final int dst) {
@@ -90,6 +96,10 @@ public class GLStateManager {
                 colorMask[3] != GL11C.GL_FALSE);
     }
 
+    public void setColorMask(final ColorMask colorMask) {
+        this.setColorMask(colorMask.red, colorMask.green, colorMask.blue, colorMask.alpha);
+    }
+
     public void setColorMask(final boolean red, final boolean green, final boolean blue, final boolean alpha) {
         GL11C.glColorMask(red, green, blue, alpha);
     }
@@ -109,6 +119,10 @@ public class GLStateManager {
         );
     }
 
+    public void setStencilMask(final StencilMask stencilMask) {
+        this.setStencilMask(stencilMask.front, stencilMask.back);
+    }
+
     public void setStencilMask(final int mask) {
         this.setStencilMask(mask, mask);
     }
@@ -125,7 +139,15 @@ public class GLStateManager {
     public Scissor getScissor() {
         final int[] scissor = new int[4];
         GL11C.glGetIntegerv(GL11C.GL_SCISSOR_BOX, scissor);
-        return new Scissor(scissor[0], scissor[1], scissor[2], scissor[3]);
+        return new Scissor(scissor);
+    }
+
+    public void setScissor(final Rectanglei scissorRectangle) {
+        this.setScissor(scissorRectangle.minX, scissorRectangle.minY, scissorRectangle.lengthX(), scissorRectangle.lengthY());
+    }
+
+    public void setScissor(final Scissor scissor) {
+        this.setScissor(scissor.x, scissor.y, scissor.width, scissor.height);
     }
 
     public void setScissor(final int x, final int y, final int width, final int height) {
@@ -135,7 +157,15 @@ public class GLStateManager {
     public Viewport getViewport() {
         final int[] viewport = new int[4];
         GL11C.glGetIntegerv(GL11C.GL_VIEWPORT, viewport);
-        return new Viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+        return new Viewport(viewport);
+    }
+
+    public void setViewport(final Rectanglei viewportRectangle) {
+        this.setViewport(viewportRectangle.minX, viewportRectangle.minY, viewportRectangle.lengthX(), viewportRectangle.lengthY());
+    }
+
+    public void setViewport(final Viewport viewport) {
+        this.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
     }
 
     public void setViewport(final int x, final int y, final int width, final int height) {
@@ -173,6 +203,10 @@ public class GLStateManager {
         );
     }
 
+    public void setPolygonOffset(final PolygonOffset polygonOffset) {
+        this.setPolygonOffset(polygonOffset.factor, polygonOffset.units);
+    }
+
     public void setPolygonOffset(final float factor, final float units) {
         GL11C.glPolygonOffset(factor, units);
     }
@@ -201,6 +235,14 @@ public class GLStateManager {
         GL30C.glBindVertexArray(vertexArray);
     }
 
+    public Framebuffer getDrawFramebuffer() {
+        return Framebuffer.fromGlIdUnsafe(GL11C.glGetInteger(GL30C.GL_DRAW_FRAMEBUFFER_BINDING));
+    }
+
+    public void setDrawFramebuffer(final Framebuffer framebuffer) {
+        GL30C.glBindFramebuffer(GL30C.GL_DRAW_FRAMEBUFFER, framebuffer.getGlId());
+    }
+
     public record BlendFunc(int srcRGB, int dstRGB, int srcAlpha, int dstAlpha) {
     }
 
@@ -211,9 +253,27 @@ public class GLStateManager {
     }
 
     public record Scissor(int x, int y, int width, int height) {
+
+        public Scissor(final int[] scissorArray) {
+            this(scissorArray[0], scissorArray[1], scissorArray[2], scissorArray[3]);
+        }
+
+        public int[] toArray() {
+            return new int[]{this.x, this.y, this.width, this.height};
+        }
+
     }
 
     public record Viewport(int x, int y, int width, int height) {
+
+        public Viewport(final int[] viewportArray) {
+            this(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
+        }
+
+        public int[] toArray() {
+            return new int[]{this.x, this.y, this.width, this.height};
+        }
+
     }
 
     public record PolygonOffset(float factor, float units) {

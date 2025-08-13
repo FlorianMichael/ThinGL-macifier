@@ -34,10 +34,10 @@ public class ColorTweakProgram extends AuxInputPostProcessingProgram {
     }
 
     @Override
-    protected void renderQuad0(final float x1, final float y1, final float x2, final float y2) {
+    protected void prepareAndRenderInternal(final float xtl, final float ytl, final float xbr, final float ybr) {
         ThinGL.glStateStack().pushBlendFunc();
         Blending.premultipliedAlphaBlending();
-        super.renderQuad0(x1, y1, x2, y2);
+        super.prepareAndRenderInternal(xtl, ytl, xbr, ybr);
         ThinGL.glStateStack().popBlendFunc();
     }
 
