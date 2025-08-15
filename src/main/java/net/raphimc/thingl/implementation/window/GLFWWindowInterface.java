@@ -42,9 +42,13 @@ public class GLFWWindowInterface extends WindowInterface {
 
     @Override
     public void responsiveSleep(final float millis) {
-        final double endTime = GLFW.glfwGetTime() + millis / 1_000;
-        for (double time = GLFW.glfwGetTime(); time < endTime; time = GLFW.glfwGetTime()) {
-            GLFW.glfwWaitEventsTimeout(endTime - time);
+        if (this.isOnWindowThread()) {
+            final double endTime = GLFW.glfwGetTime() + millis / 1_000;
+            for (double time = GLFW.glfwGetTime(); time < endTime; time = GLFW.glfwGetTime()) {
+                GLFW.glfwWaitEventsTimeout(endTime - time);
+            }
+        } else {
+            super.responsiveSleep(millis);
         }
     }
 
@@ -54,7 +58,9 @@ public class GLFWWindowInterface extends WindowInterface {
 
     @Override
     public void free() {
-        GLFW.glfwSetFramebufferSizeCallback(this.windowHandle, this.originalFramebufferSizeCallback);
+        if (this.isOnWindowThread()) {
+            GLFW.glfwSetFramebufferSizeCallback(this.windowHandle, this.originalFramebufferSizeCallback);
+        }
     }
 
     private void onSetFramebufferSize(final long windowHandle, final int width, final int height) {
