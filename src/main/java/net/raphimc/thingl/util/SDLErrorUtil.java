@@ -17,23 +17,26 @@
  */
 package net.raphimc.thingl.util;
 
-import net.raphimc.thingl.ThinGL;
+import org.lwjgl.sdl.SDLError;
 
-public class FPSLimiter {
+public class SDLErrorUtil {
 
-    static {
-        TimerHack.ensureRunning();
+    public static void checkError(final long result) {
+        SDLErrorUtil.checkError(result, "SDL Error");
     }
 
-    public static void limitFPS(final int fps) {
-        if (fps <= 0) {
-            return;
+    public static void checkError(final long result, final String message) {
+        SDLErrorUtil.checkError(result != 0, message);
+    }
+
+    public static void checkError(final boolean result) {
+        SDLErrorUtil.checkError(result, "SDL Error");
+    }
+
+    public static void checkError(final boolean result, final String message) {
+        if (!result) {
+            throw new IllegalStateException(message + ": " + SDLError.SDL_GetError());
         }
-        final float timeToWait = 1000F / fps - ThinGL.get().getFullFrameTime();
-        if (timeToWait <= 0) {
-            return;
-        }
-        ThinGL.windowInterface().responsiveSleep(timeToWait);
     }
 
 }

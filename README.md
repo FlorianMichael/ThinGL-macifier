@@ -5,8 +5,8 @@ This is a fork of the original [ThinGL](https://github.com/RaphiMC/ThinGL) proje
 ### Changes made to the project
 
 * **Added macOS support** Lowers the OpenGL requirement from 4.5 to 4.1
-* **New functions** 
-  - `Renderer2D#outlinedGradientRectangle`
+* **New functions**
+    - `Renderer2D#outlinedGradientRectangle`
 
 Changes in the source code are marked with comments for clarity
 
