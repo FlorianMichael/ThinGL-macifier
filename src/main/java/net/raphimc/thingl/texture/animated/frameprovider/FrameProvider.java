@@ -15,23 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.thingl.drawbuilder.databuilder.holder;
+package net.raphimc.thingl.texture.animated.frameprovider;
 
-import net.raphimc.thingl.drawbuilder.builder.BufferBuilder;
+import net.raphimc.thingl.resource.image.texture.Texture2D;
 
-import java.util.function.Function;
+import java.io.IOException;
 
-public class Std430ShaderDataHolder extends StdShaderDataHolder {
+public interface FrameProvider {
 
-    public static final Function<BufferBuilder, Std430ShaderDataHolder> SUPPLIER = Std430ShaderDataHolder::new;
+    int loadNextFrame(final Texture2D target) throws IOException;
 
-    public Std430ShaderDataHolder(final BufferBuilder bufferBuilder) {
-        super(bufferBuilder);
-    }
+    int getWidth();
 
-    @Override
-    protected int getStructAlignment(final int maxMemberAlignment) {
-        return maxMemberAlignment;
-    }
+    int getHeight();
+
+    int getFrameCount();
+
+    void free();
 
 }
