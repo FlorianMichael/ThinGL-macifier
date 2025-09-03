@@ -20,10 +20,8 @@ package net.raphimc.thingl.text.renderer;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.lenni0451.commons.color.Color;
-import net.raphimc.thingl.ThinGL;
 import net.raphimc.thingl.drawbuilder.BuiltinDrawBatches;
 import net.raphimc.thingl.drawbuilder.DrawBatch;
-import net.raphimc.thingl.drawbuilder.DrawMode;
 import net.raphimc.thingl.drawbuilder.databuilder.holder.ShaderDataHolder;
 import net.raphimc.thingl.drawbuilder.databuilder.holder.Std430ShaderDataHolder;
 import net.raphimc.thingl.drawbuilder.databuilder.holder.VertexDataHolder;
@@ -33,10 +31,7 @@ import net.raphimc.thingl.renderer.Primitives;
 import net.raphimc.thingl.resource.program.Program;
 import net.raphimc.thingl.text.TextSegment;
 import net.raphimc.thingl.text.font.Font;
-import net.raphimc.thingl.text.shaper.ShapedTextBuffer;
-import net.raphimc.thingl.text.shaper.ShapedTextRun;
-import net.raphimc.thingl.text.shaper.ShapedTextSegment;
-import net.raphimc.thingl.text.shaper.TextShaper;
+import net.raphimc.thingl.text.shaping.*;
 import net.raphimc.thingl.texture.StaticAtlasTexture;
 import net.raphimc.thingl.util.rectpack.Slot;
 import org.joml.Matrix4f;
@@ -61,24 +56,35 @@ public abstract class TextRenderer {
     private float globalScale = 1F;
 
     public TextRenderer(final Supplier<Program> program) {
-        this.textDrawBatch = new DrawBatch(program, DrawMode.QUADS, BuiltinDrawBatches.POSITION_TEXTURE_LAYOUT, () -> {
-            ThinGL.glStateStack().push();
-            ThinGL.glStateStack().enable(GL11C.GL_BLEND);
-            final int[] textureIds = new int[this.glyphAtlases.size()];
-            for (int i = 0; i < this.glyphAtlases.size(); i++) {
-                textureIds[i] = this.glyphAtlases.get(i).getGlId();
-            }
-            program.get().setUniformSamplerArray("u_Textures", textureIds);
-        }, () -> ThinGL.glStateStack().pop());
+        this.textDrawBatch = new DrawBatch.Builder(BuiltinDrawBatches.TEXTURE_SNIPPET)
+                .program(program)
+                .appendSetupAction(p -> {
+                    final int[] textureIds = new int[this.glyphAtlases.size()];
+                    for (int i = 0; i < this.glyphAtlases.size(); i++) {
+                        textureIds[i] = this.glyphAtlases.get(i).getGlId();
+                    }
+                    p.setUniformSamplerArray("u_Textures", textureIds);
+                })
+                .build();
     }
 
-    public void renderTextBuffer(final Matrix4f positionMatrix, final MultiDrawBatchDataHolder multiDrawBatchDataHolder, final ShapedTextBuffer textBuffer, float x, float y, final float z) {
-        for (ShapedTextRun textRun : textBuffer.runs()) {
-            x += textRun.xOffset() * this.globalScale;
-            y += textRun.yOffset() * this.globalScale;
-            this.renderTextRun(positionMatrix, multiDrawBatchDataHolder, textRun, x, y, z, textBuffer.runs().get(0).font());
-            x += textRun.nextRunX() * this.globalScale;
-            y += textRun.nextRunY() * this.globalScale;
+    public void renderTextBlock(final Matrix4f positionMatrix, final MultiDrawBatchDataHolder multiDrawBatchDataHolder, final ShapedTextBlock textBlock, final float x, float y, final float z) {
+        for (ShapedTextLine textLine : textBlock.lines()) {
+            this.renderTextLine(positionMatrix, multiDrawBatchDataHolder, textLine, x, y, z);
+            y += textLine.logicalBounds().lengthY() * this.globalScale;
+        }
+    }
+
+    public void renderTextLine(final Matrix4f positionMatrix, final MultiDrawBatchDataHolder multiDrawBatchDataHolder, final ShapedTextLine textLine, float x, final float y, final float z) {
+        for (int i = 0; i < textLine.runs().size(); i++) {
+            final ShapedTextRun textRun = textLine.runs().get(i);
+            if (i == 0) {
+                this.renderTextRun(positionMatrix, multiDrawBatchDataHolder, textRun, x, y, z, textRun.font());
+                x += textRun.visualBounds().minX * this.globalScale;
+            } else {
+                this.renderTextRun(positionMatrix, multiDrawBatchDataHolder, textRun, x - textRun.visualBounds().minX * this.globalScale, y, z, textLine.runs().get(0).font());
+            }
+            x += textRun.logicalBounds().maxX * this.globalScale;
         }
     }
 
@@ -107,16 +113,16 @@ public abstract class TextRenderer {
             if (textSegment.glyphs().isEmpty()) {
                 continue;
             }
-            final float xOffset = textSegment.xVisualOffset() * this.globalScale;
-            final float yOffset = textSegment.yVisualOffset() * this.globalScale;
+            final float xOffset = textSegment.visualOffset().x * this.globalScale;
+            final float yOffset = textSegment.visualOffset().y * this.globalScale;
 
             if ((textSegment.styleFlags() & TextSegment.STYLE_SHADOW_BIT) != 0) {
                 int shadowSegmentStyleFlags = textSegment.styleFlags() & ~TextSegment.STYLE_STRIKETHROUGH_BIT;
                 if (textSegment.outlineColor().getAlpha() > 0) {
                     shadowSegmentStyleFlags |= TextSegment.STYLE_BOLD_BIT;
                 }
-                final ShapedTextSegment shadowTextSegment = new ShapedTextSegment(textSegment.glyphs(), textSegment.color().multiply(0.25F), shadowSegmentStyleFlags, Color.TRANSPARENT, textSegment.xVisualOffset(), textSegment.yVisualOffset(), textSegment.bounds(), textSegment.extendedBounds());
-                final ShapedTextSegment nonShadowTextSegment = new ShapedTextSegment(textSegment.glyphs(), textSegment.color(), textSegment.styleFlags() & ~TextSegment.STYLE_SHADOW_BIT, textSegment.outlineColor(), textSegment.xVisualOffset(), textSegment.yVisualOffset(), textSegment.bounds(), textSegment.extendedBounds());
+                final ShapedTextSegment shadowTextSegment = new ShapedTextSegment(textSegment.glyphs(), textSegment.color().multiply(0.25F), shadowSegmentStyleFlags, Color.TRANSPARENT, textSegment.visualOffset(), textSegment.visualBounds(), textSegment.logicalBounds());
+                final ShapedTextSegment nonShadowTextSegment = new ShapedTextSegment(textSegment.glyphs(), textSegment.color(), textSegment.styleFlags() & ~TextSegment.STYLE_SHADOW_BIT, textSegment.outlineColor(), textSegment.visualOffset(), textSegment.visualBounds(), textSegment.logicalBounds());
                 final float shadowOffset = SHADOW_OFFSET_FACTOR * textRun.font().getSize() * this.globalScale;
                 this.renderTextSegment(positionMatrix, multiDrawBatchDataHolder, shadowTextSegment, x + xOffset + shadowOffset, y + yOffset + shadowOffset, z);
                 this.renderTextDecorations(positionMatrix, multiDrawBatchDataHolder, shadowTextSegment, x + xOffset + shadowOffset, y + yOffset + shadowOffset, z, decorationFont);
@@ -134,7 +140,7 @@ public abstract class TextRenderer {
     protected void renderTextSegment(final Matrix4f positionMatrix, final MultiDrawBatchDataHolder multiDrawBatchDataHolder, final ShapedTextSegment textSegment, final float x, final float y, final float z, final int textDataIndex) {
         final DrawBatchDataHolder drawBatchDataHolder = multiDrawBatchDataHolder.getDrawBatchDataHolder(this.textDrawBatch);
         final VertexDataHolder vertexDataHolder = drawBatchDataHolder.getVertexDataHolder();
-        final ShaderDataHolder glyphDataHolder = drawBatchDataHolder.getShaderDataHolder("ssbo_GlyphData", Std430ShaderDataHolder.SUPPLIER).ensureInTopLevelArray();
+        final ShaderDataHolder glyphDataHolder = drawBatchDataHolder.getShaderStorageDataHolder("ssbo_GlyphData", Std430ShaderDataHolder.SUPPLIER).ensureInTopLevelArray();
 
         for (TextShaper.Glyph shapedGlyph : textSegment.glyphs()) {
             final Font.Glyph fontGlyph = shapedGlyph.fontGlyph();
@@ -157,7 +163,7 @@ public abstract class TextRenderer {
                     halfLineThickness *= 1.5F;
                 }
                 final float lineY = y + font.getUnderlinePosition() * this.globalScale;
-                Primitives.filledRectangle(positionMatrix, multiDrawBatchDataHolder, x + textSegment.extendedBounds().minX * this.globalScale, lineY - halfLineThickness, x + textSegment.extendedBounds().maxX * this.globalScale, lineY + halfLineThickness, z, textColor);
+                Primitives.filledRectangle(positionMatrix, multiDrawBatchDataHolder, x + textSegment.logicalBounds().minX * this.globalScale, lineY - halfLineThickness, x + textSegment.logicalBounds().maxX * this.globalScale, lineY + halfLineThickness, z, textColor);
             }
             if ((styleFlags & TextSegment.STYLE_STRIKETHROUGH_BIT) != 0) {
                 float lineThickness = font.getStrikethroughThickness() * this.globalScale;
@@ -165,7 +171,7 @@ public abstract class TextRenderer {
                     lineThickness *= 1.5F;
                 }
                 final float lineY = y + font.getStrikethroughPosition() * this.globalScale;
-                Primitives.filledRectangle(positionMatrix, multiDrawBatchDataHolder, x + textSegment.extendedBounds().minX * this.globalScale, lineY, x + textSegment.extendedBounds().maxX * this.globalScale, lineY + lineThickness, z, textColor);
+                Primitives.filledRectangle(positionMatrix, multiDrawBatchDataHolder, x + textSegment.logicalBounds().minX * this.globalScale, lineY, x + textSegment.logicalBounds().maxX * this.globalScale, lineY + lineThickness, z, textColor);
             }
         }
     }

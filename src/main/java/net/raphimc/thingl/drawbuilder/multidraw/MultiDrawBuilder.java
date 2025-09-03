@@ -89,8 +89,11 @@ public class MultiDrawBuilder {
             throw new IllegalArgumentException("BuiltBuffer has more than one vertex buffer");
         }
         final Buffer vertexBuffer = vertexArray.getVertexBuffers().get(0);
-        if (!builtBuffer.shaderDataBuffers().isEmpty()) {
-            throw new IllegalArgumentException("BuiltBuffer has shader data buffers");
+        if (!builtBuffer.uniformBuffers().isEmpty()) {
+            throw new IllegalArgumentException("BuiltBuffer has uniform buffers");
+        }
+        if (!builtBuffer.shaderStorageBuffers().isEmpty()) {
+            throw new IllegalArgumentException("BuiltBuffer has shader storage buffers");
         }
         for (DrawCommand drawCommand : drawCommands) {
             if (drawCommand.instanceCount() != 1 || drawCommand.baseInstance() != 0) {
@@ -206,7 +209,7 @@ public class MultiDrawBuilder {
         this.commandBuffer.ensureSize(commandData.remaining());
         this.commandBuffer.upload(commandData);
         ThinGL.bufferBuilderPool().returnBufferBuilder(commandBufferBuilder);
-        this.builtBuffer = new BuiltBuffer(this.drawBatch, this.vertexArray, new HashMap<>(), this.commandBuffer, drawCommands);
+        this.builtBuffer = new BuiltBuffer(this.drawBatch, this.vertexArray, new HashMap<>(), new HashMap<>(), this.commandBuffer, drawCommands);
     }
 
     public void free() {

@@ -15,28 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.thingl.text.shaper;
+package net.raphimc.thingl.texture.animated.frameprovider;
 
-import net.raphimc.thingl.text.TextBuffer;
-import net.raphimc.thingl.text.TextRun;
-import net.raphimc.thingl.text.font.Font;
+import net.raphimc.thingl.resource.image.texture.Texture2D;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
-public abstract class TextShaper {
+public interface FrameProvider {
 
-    public ShapedTextBuffer shape(final TextBuffer textBuffer) {
-        final List<ShapedTextRun> shapedTextRuns = new ArrayList<>(textBuffer.runs().size());
-        for (TextRun textRun : textBuffer.runs()) {
-            shapedTextRuns.add(this.shape(textRun));
-        }
-        return new ShapedTextBuffer(shapedTextRuns);
-    }
+    int loadNextFrame(final Texture2D target) throws IOException;
 
-    public abstract ShapedTextRun shape(final TextRun textRun);
+    int getWidth();
 
-    public record Glyph(Font.Glyph fontGlyph, float x, float y) {
-    }
+    int getHeight();
+
+    int getFrameCount();
+
+    void free();
 
 }

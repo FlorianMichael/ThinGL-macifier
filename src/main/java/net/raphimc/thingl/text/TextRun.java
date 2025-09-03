@@ -20,14 +20,13 @@ package net.raphimc.thingl.text;
 import net.lenni0451.commons.collections.Lists;
 import net.lenni0451.commons.color.Color;
 import net.raphimc.thingl.text.font.Font;
-import net.raphimc.thingl.text.shaper.ShapedTextRun;
-import net.raphimc.thingl.text.shaper.TextShaper;
-import net.raphimc.thingl.text.shaper.impl.BasicTextShaper;
+import net.raphimc.thingl.text.shaping.ShapedTextRun;
+import net.raphimc.thingl.text.shaping.TextShaper;
+import net.raphimc.thingl.text.shaping.impl.BasicTextShaper;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public record TextRun(Font font, List<TextSegment> segments, float xOffset, float yOffset) {
+public record TextRun(Font font, List<TextSegment> segments) {
 
     public static TextRun fromString(final Font font, final String text) {
         return fromString(font, text, Color.WHITE);
@@ -41,16 +40,8 @@ public record TextRun(Font font, List<TextSegment> segments, float xOffset, floa
         return new TextRun(font, new TextSegment(text, color, styleFlags));
     }
 
-    public TextRun(final Font font, final List<TextSegment> segments) {
-        this(font, segments, 0F, 0F);
-    }
-
-    public TextRun(final Font font, float xOffset, float yOffset) {
-        this(font, new ArrayList<>(), xOffset, yOffset);
-    }
-
-    public TextRun(final Font font, final TextSegment... segment) {
-        this(font, Lists.arrayList(segment));
+    public TextRun(final Font font, final TextSegment... segments) {
+        this(font, Lists.arrayList(segments));
     }
 
     public TextRun addSegment(final TextSegment segment) {
@@ -63,7 +54,7 @@ public record TextRun(Font font, List<TextSegment> segments, float xOffset, floa
     }
 
     public ShapedTextRun shape() {
-        return BasicTextShaper.INSTANCE.shape(this);
+        return this.shape(BasicTextShaper.INSTANCE);
     }
 
     public ShapedTextRun shape(final TextShaper shaper) {

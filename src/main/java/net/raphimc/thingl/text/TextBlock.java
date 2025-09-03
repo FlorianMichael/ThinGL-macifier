@@ -15,23 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.thingl.drawbuilder.databuilder.holder;
+package net.raphimc.thingl.text;
 
-import net.raphimc.thingl.drawbuilder.builder.BufferBuilder;
+import net.lenni0451.commons.collections.Lists;
+import net.raphimc.thingl.text.shaping.ShapedTextBlock;
+import net.raphimc.thingl.text.shaping.TextShaper;
+import net.raphimc.thingl.text.shaping.impl.BasicTextShaper;
 
-import java.util.function.Function;
+import java.util.List;
 
-public class Std430ShaderDataHolder extends StdShaderDataHolder {
+public record TextBlock(List<TextLine> lines) {
 
-    public static final Function<BufferBuilder, Std430ShaderDataHolder> SUPPLIER = Std430ShaderDataHolder::new;
-
-    public Std430ShaderDataHolder(final BufferBuilder bufferBuilder) {
-        super(bufferBuilder);
+    public TextBlock(final TextLine... lines) {
+        this(Lists.arrayList(lines));
     }
 
-    @Override
-    protected int getStructAlignment(final int maxMemberAlignment) {
-        return maxMemberAlignment;
+    public TextBlock addLine(final TextLine line) {
+        this.lines.add(line);
+        return this;
+    }
+
+    public TextBlock add(final TextLine line) {
+        return this.addLine(line);
+    }
+
+    public ShapedTextBlock shape() {
+        return this.shape(BasicTextShaper.INSTANCE);
+    }
+
+    public ShapedTextBlock shape(final TextShaper shaper) {
+        return shaper.shape(this);
     }
 
 }
