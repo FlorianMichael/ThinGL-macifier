@@ -9,7 +9,7 @@ plugins {
 
 repositories {
     maven {
-        name = "Lenni0451 Snapshots"
+        name = "Lenni0451"
         url = "https://maven.lenni0451.net/snapshots"
     }
     maven {
@@ -17,7 +17,7 @@ repositories {
         url = "https://jitpack.io"
 
         content {
-            includeGroup "com.github.RaphiMC"
+            includeGroupByRegex "com\\.github\\..+"
         }
     }
     maven {
@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly "org.jetbrains:annotations:26.0.2"
+    compileOnly "org.jetbrains:annotations:26.0.2-1"
     api("org.joml:joml:1.10.8") {
         exclude group: "org.jetbrains.kotlin" // https://github.com/JOML-CI/JOML/issues/352
     }
