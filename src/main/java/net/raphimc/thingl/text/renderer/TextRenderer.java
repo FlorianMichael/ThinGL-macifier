@@ -33,9 +33,9 @@ import net.raphimc.thingl.text.TextSegment;
 import net.raphimc.thingl.text.font.Font;
 import net.raphimc.thingl.text.shaping.*;
 import net.raphimc.thingl.texture.StaticAtlasTexture;
+import net.raphimc.thingl.util.BufferUtil;
 import net.raphimc.thingl.util.rectpack.Slot;
 import org.joml.Matrix4f;
-import org.lwjgl.system.MemoryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -174,12 +174,12 @@ public abstract class TextRenderer {
                 Primitives.filledRectangle(positionMatrix, multiDrawBatchDataHolder, x + textSegment.logicalBounds().minX * this.globalScale, lineY - halfLineThickness, x + textSegment.logicalBounds().maxX * this.globalScale, lineY + halfLineThickness, z, textColor);
             }
             if ((styleFlags & TextSegment.STYLE_STRIKETHROUGH_BIT) != 0) {
-                float lineThickness = font.getStrikethroughThickness() * this.globalScale;
+                float halfLineThickness = (font.getStrikethroughThickness() * this.globalScale) / 2F;
                 if ((styleFlags & TextSegment.STYLE_BOLD_BIT) != 0) {
-                    lineThickness *= 1.5F;
+                    halfLineThickness *= 1.5F;
                 }
                 final float lineY = y + font.getStrikethroughPosition() * this.globalScale;
-                Primitives.filledRectangle(positionMatrix, multiDrawBatchDataHolder, x + textSegment.logicalBounds().minX * this.globalScale, lineY, x + textSegment.logicalBounds().maxX * this.globalScale, lineY + lineThickness, z, textColor);
+                Primitives.filledRectangle(positionMatrix, multiDrawBatchDataHolder, x + textSegment.logicalBounds().minX * this.globalScale, lineY - halfLineThickness, x + textSegment.logicalBounds().maxX * this.globalScale, lineY + halfLineThickness, z, textColor);
             }
         }
     }
@@ -229,7 +229,7 @@ public abstract class TextRenderer {
                 break;
             }
         }
-        MemoryUtil.memFree(glyphBitmap.pixelBuffer());
+        BufferUtil.memFree(glyphBitmap.pixelBuffer());
         if (atlasSlot == null) { // Should never happen
             throw new IllegalStateException("Failed to find a free slot for glyph in atlas");
         }
