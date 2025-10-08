@@ -36,9 +36,13 @@ import net.raphimc.thingl.texture.StaticAtlasTexture;
 import net.raphimc.thingl.util.BufferUtil;
 import net.raphimc.thingl.util.rectpack.Slot;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL30C;
+import org.lwjgl.opengl.GL33C;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class TextRenderer {
@@ -56,11 +60,14 @@ public abstract class TextRenderer {
     private float globalScale = 1F;
 
     public TextRenderer(final Supplier<Program> program, final Font.GlyphBitmap.RenderMode glyphRenderMode) {
-        this(new DrawBatch.Builder(BuiltinDrawBatches.TEXTURE_SNIPPET).program(program).build(), glyphRenderMode);
+        this(program, glyphRenderMode, p -> {
+        });
     }
 
-    public TextRenderer(final DrawBatch drawBatch, final Font.GlyphBitmap.RenderMode glyphRenderMode) {
-        this.drawBatch = new DrawBatch.Builder(drawBatch)
+    public TextRenderer(final Supplier<Program> program, final Font.GlyphBitmap.RenderMode glyphRenderMode, final Consumer<Program> programSetup) {
+        this.drawBatch = new DrawBatch.Builder(BuiltinDrawBatches.TEXTURE_SNIPPET)
+                .program(program)
+                .appendSetupAction(programSetup)
                 .appendSetupAction(p -> {
                     final int[] textureIds = new int[this.glyphAtlases.size()];
                     for (int i = 0; i < this.glyphAtlases.size(); i++) {
@@ -134,8 +141,8 @@ public abstract class TextRenderer {
                 final float shadowOffset = SHADOW_OFFSET_FACTOR * textRun.font().getSize() * this.globalScale;
                 this.renderTextSegment(positionMatrix, multiDrawBatchDataHolder, shadowTextSegment, x + xOffset + shadowOffset, y + yOffset + shadowOffset, z);
                 this.renderTextDecorations(positionMatrix, multiDrawBatchDataHolder, shadowTextSegment, x + xOffset + shadowOffset, y + yOffset + shadowOffset, z, decorationFont);
-                this.renderTextSegment(positionMatrix, multiDrawBatchDataHolder, nonShadowTextSegment, x + xOffset, y + yOffset, z + 0.01F);
-                this.renderTextDecorations(positionMatrix, multiDrawBatchDataHolder, nonShadowTextSegment, x + xOffset, y + yOffset, z + 0.01F, decorationFont);
+                this.renderTextSegment(positionMatrix, multiDrawBatchDataHolder, nonShadowTextSegment, x + xOffset, y + yOffset, z);
+                this.renderTextDecorations(positionMatrix, multiDrawBatchDataHolder, nonShadowTextSegment, x + xOffset, y + yOffset, z, decorationFont);
             } else {
                 this.renderTextSegment(positionMatrix, multiDrawBatchDataHolder, textSegment, x + xOffset, y + yOffset, z);
                 this.renderTextDecorations(positionMatrix, multiDrawBatchDataHolder, textSegment, x + xOffset, y + yOffset, z, decorationFont);
@@ -210,7 +217,7 @@ public abstract class TextRenderer {
     }
 
     private AtlasGlyph createAtlasGlyph(final Font.Glyph fontGlyph) {
-        final Font.GlyphBitmap glyphBitmap = fontGlyph.font().createGlyphBitmap(fontGlyph.glyphIndex(), this.glyphRenderMode);
+        final Font.GlyphBitmap glyphBitmap = fontGlyph.font().createGlyphBitmap(fontGlyph, this.glyphRenderMode);
         if (glyphBitmap == null) {
             return null;
         }
@@ -219,8 +226,31 @@ public abstract class TextRenderer {
         StaticAtlasTexture atlas = null;
         for (int i = 0; i <= this.glyphAtlases.size(); i++) {
             if (i == this.glyphAtlases.size()) {
-                atlas = new StaticAtlasTexture(this.glyphRenderMode.getTextureFormat(), ATLAS_SIZE, ATLAS_SIZE);
-                atlas.setFilter(this.glyphRenderMode.getTextureFilter());
+                atlas = switch (this.glyphRenderMode) {
+                    case PIXELATED -> {
+                        final StaticAtlasTexture atlasTexture = new StaticAtlasTexture(GL30C.GL_R8, ATLAS_SIZE, ATLAS_SIZE);
+                        atlasTexture.setFilter(GL11C.GL_NEAREST);
+                        atlasTexture.setParameterIntArray(GL33C.GL_TEXTURE_SWIZZLE_RGBA, new int[]{GL11C.GL_ONE, GL11C.GL_ONE, GL11C.GL_ONE, GL11C.GL_RED});
+                        yield atlasTexture;
+                    }
+                    case COLORED_PIXELATED -> {
+                        final StaticAtlasTexture atlasTexture = new StaticAtlasTexture(GL11C.GL_RGBA8, ATLAS_SIZE, ATLAS_SIZE);
+                        atlasTexture.setFilter(GL11C.GL_NEAREST);
+                        yield atlasTexture;
+                    }
+                    case ANTIALIASED -> {
+                        final StaticAtlasTexture atlasTexture = new StaticAtlasTexture(GL30C.GL_R8, ATLAS_SIZE, ATLAS_SIZE);
+                        atlasTexture.setParameterIntArray(GL33C.GL_TEXTURE_SWIZZLE_RGBA, new int[]{GL11C.GL_ONE, GL11C.GL_ONE, GL11C.GL_ONE, GL11C.GL_RED});
+                        yield atlasTexture;
+                    }
+                    case COLORED_ANTIALIASED -> new StaticAtlasTexture(GL11C.GL_RGBA8, ATLAS_SIZE, ATLAS_SIZE);
+                    case BSDF, SDF -> {
+                        final StaticAtlasTexture atlasTexture = new StaticAtlasTexture(GL30C.GL_R8, ATLAS_SIZE, ATLAS_SIZE);
+                        atlasTexture.setParameterIntArray(GL33C.GL_TEXTURE_SWIZZLE_RGBA, new int[]{GL11C.GL_RED, GL11C.GL_RED, GL11C.GL_RED, GL11C.GL_ONE});
+                        yield atlasTexture;
+                    }
+                    case MSDF -> new StaticAtlasTexture(GL11C.GL_RGB8, ATLAS_SIZE, ATLAS_SIZE);
+                };
             } else {
                 atlas = this.glyphAtlases.get(i);
             }

@@ -17,8 +17,11 @@
  */
 package net.raphimc.thingl.awt.text;
 
+import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import net.raphimc.thingl.awt.AwtUtil;
 import net.raphimc.thingl.text.font.Font;
+import net.raphimc.thingl.util.ImageUtil;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL12C;
 import org.lwjgl.system.MemoryUtil;
 
@@ -56,37 +59,48 @@ public class AwtFont extends Font {
             this.graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
         }
         this.graphics.setFont(font);
+        this.graphics.setColor(Color.WHITE);
         this.fontMetrics = this.font.getLineMetrics("", this.graphics.getFontRenderContext());
         this.postScriptName = font.getPSName();
         this.familyName = font.getFamily();
     }
 
     @Override
-    public GlyphBitmap createGlyphBitmap(final int glyphIndex, final GlyphBitmap.RenderMode renderMode) {
-        final GlyphVector glyphVector = this.font.createGlyphVector(this.graphics.getFontRenderContext(), new int[]{glyphIndex});
+    public GlyphBitmap createGlyphBitmap(final Glyph glyph, final GlyphBitmap.RenderMode renderMode) {
+        final GlyphVector glyphVector = this.font.createGlyphVector(this.graphics.getFontRenderContext(), new int[]{glyph.glyphIndex()});
         if (glyphVector.getNumGlyphs() != 1) {
-            throw new IllegalStateException("Glyph vector for glyph index " + glyphIndex + " does not map to exactly one glyph");
+            throw new IllegalStateException("Glyph vector for glyph index " + glyph.glyphIndex() + " does not map to exactly one glyph");
         }
-        final Glyph glyph = this.getGlyphByIndex(glyphIndex);
 
         switch (renderMode) {
             case PIXELATED, COLORED_PIXELATED -> this.graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
             case ANTIALIASED, COLORED_ANTIALIASED -> this.graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             default -> throw new IllegalArgumentException("Unsupported render mode: " + renderMode);
         }
-
-        this.graphics.setColor(Color.BLACK);
-        this.graphics.clearRect(0, 0, this.drawImage.getWidth(), this.drawImage.getHeight());
-        this.graphics.setColor(Color.WHITE);
+        this.graphics.setComposite(AlphaComposite.Clear);
+        this.graphics.fillRect(0, 0, this.drawImage.getWidth(), this.drawImage.getHeight());
+        this.graphics.setComposite(AlphaComposite.Src);
         this.graphics.drawGlyphVector(glyphVector, -glyph.bearingX(), -glyph.bearingY());
-
         final int width = (int) Math.ceil(glyph.width());
         final int height = (int) Math.ceil(glyph.height());
         final int[] pixels = new int[width * height];
         this.drawImage.getRGB(0, 0, width, height, pixels, 0, width);
-        final ByteBuffer pixelBuffer = MemoryUtil.memAlloc(pixels.length * Integer.BYTES);
-        pixelBuffer.order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(pixels).flip();
-        return new GlyphBitmap(width, height, glyph.bearingX(), glyph.bearingY(), GL12C.GL_BGRA, pixelBuffer);
+
+        final IntObjectPair<ByteBuffer> pixelData = switch (renderMode) {
+            case PIXELATED, ANTIALIASED -> {
+                final ByteBuffer buffer = ByteBuffer.allocate(pixels.length * Integer.BYTES);
+                buffer.order(ByteOrder.BIG_ENDIAN).asIntBuffer().put(pixels).flip();
+                yield IntObjectPair.of(GL11C.GL_RED, ImageUtil.convertColorToGrayscale(buffer, width, height, 0, false, true));
+            }
+            case COLORED_PIXELATED, COLORED_ANTIALIASED -> {
+                final ByteBuffer buffer = MemoryUtil.memAlloc(pixels.length * Integer.BYTES);
+                buffer.order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(pixels).flip();
+                yield IntObjectPair.of(GL12C.GL_BGRA, buffer);
+            }
+            default -> throw new IllegalArgumentException("Unsupported render mode: " + renderMode);
+        };
+
+        return new GlyphBitmap(width, height, glyph.bearingX(), glyph.bearingY(), pixelData.leftInt(), pixelData.right());
     }
 
     @Override
@@ -142,6 +156,11 @@ public class AwtFont extends Font {
     @Override
     public String getFamilyName() {
         return this.familyName;
+    }
+
+    @Override
+    public String getSubFamilyName() {
+        return null;
     }
 
     @Override
