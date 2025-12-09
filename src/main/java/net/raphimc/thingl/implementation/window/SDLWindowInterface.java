@@ -27,7 +27,7 @@ public class SDLWindowInterface extends WindowInterface {
 
     private final long windowHandle;
     private final int windowId;
-    private final SDL_EventFilterI eventWatch = this::onEvent;
+    private final SDL_EventFilterI eventWatch = null; // FlorianMichael - Fix compile error
 
     public SDLWindowInterface() {
         this(SDLVideo.SDL_GL_GetCurrentWindow());
