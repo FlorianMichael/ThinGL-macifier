@@ -20,18 +20,18 @@ An exception to this are the GL42C+ replaces inside the resource package. During
 
 Run `python merge_upstream.py` to add upstream commits. Resolve merge conflicts and `git commit --amend` into the merge commit.
 
-## Include via JitPack
+## Use in Gradle/Maven
 
 I wouldn't necessarily recommend depending on this, but if needed
 
-### 1. Add the JitPack repository
+### 1. Add my repository
 
 <details>
 <summary><strong>Gradle (Kotlin DSL)</strong></summary>
 
 ```kotlin
 repositories {
-    maven("https://jitpack.io")
+    maven("https://maven.florianmichael.de/everything")
 }
 ```
 
@@ -42,7 +42,7 @@ repositories {
 
 ```groovy
 repositories {
-    maven { url 'https://jitpack.io' }
+    maven { url 'https://maven.florianmichael.de/everything' }
 }
 ```
 
@@ -57,7 +57,7 @@ Replace `VERSION` with a tag, release, or commit hash from this repository.
 
 ```kotlin
 dependencies {
-    implementation("com.github.FlorianMichael:ThinGL-macifier:VERSION")
+    implementation("net.raphimc:thingl:VERSION")
 }
 ```
 
@@ -68,7 +68,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.github.FlorianMichael:ThinGL-macifier:VERSION'
+    implementation 'net.raphimc:thingl:VERSION'
 }
 ```
 
