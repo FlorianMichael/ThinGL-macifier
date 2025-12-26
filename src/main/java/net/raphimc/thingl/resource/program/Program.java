@@ -191,11 +191,13 @@ public class Program extends GLContainerObject {
 
     public void setUniformSampler(final String name, final int textureId) {
         de.florianmichael.thingl.GlCommands.get().glBindTextureUnit(this.currentTextureUnit, textureId); // FlorianMichael - add macOS support
+        GL33C.glBindSampler(this.currentTextureUnit, 0); // FlorianMichael - backport https://github.com/RaphiMC/ThinGL/commit/2efca55c2ad752f386c6f606bb085a059f425d75
         this.setUniformInt(name, this.currentTextureUnit++);
     }
 
     public void setUniformSamplerArray(final String name, final int... textureIds) {
         de.florianmichael.thingl.GlCommands.get().glBindTextures(this.currentTextureUnit, textureIds); // FlorianMichael - add macOS support
+        GL44C.nglBindSamplers(this.currentTextureUnit, textureIds.length, 0L); // FlorianMichael - backport https://github.com/RaphiMC/ThinGL/commit/2efca55c2ad752f386c6f606bb085a059f425d75
         final int[] textureUnits = new int[textureIds.length];
         for (int i = 0; i < textureIds.length; i++) {
             textureUnits[i] = this.currentTextureUnit + i;
